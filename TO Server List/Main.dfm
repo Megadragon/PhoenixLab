@@ -1,10 +1,10 @@
 object MainForm: TMainForm
-  Left = 612
-  Top = 433
+  Left = 615
+  Top = 276
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'TO Server List'
-  ClientHeight = 168
+  ClientHeight = 508
   ClientWidth = 468
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -45,29 +45,114 @@ object MainForm: TMainForm
       3000000008000800000061006C006C00000008000C000000660061006C007300
       6500000008000C000000660061006C0073006500000008000400000030000000}
   end
-  object sttRegInfo: TStaticText
-    Left = 8
-    Top = 136
-    Width = 205
-    Height = 23
-    Caption = #1048#1085#1092#1086#1088#1084#1072#1094#1080#1103' '#1086' '#1088#1077#1075#1080#1089#1090#1088#1072#1094#1080#1080
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
+  object Panel: TPanel
+    Left = 0
+    Top = 120
+    Width = 468
+    Height = 388
+    Align = alClient
+    BevelInner = bvLowered
+    Color = 12339
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clLime
     Font.Height = -16
     Font.Name = 'Times New Roman'
-    Font.Style = [fsBold]
+    Font.Style = []
+    Locked = True
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 1
-  end
-  object btnCreateKey: TButton
-    Left = 376
-    Top = 128
-    Width = 81
-    Height = 25
-    Caption = #1057#1086#1079#1076#1072#1090#1100' '#1082#1083#1102#1095
-    TabOrder = 2
-    OnClick = btnCreateKeyClick
+    object shpRun: TShape
+      Left = 200
+      Top = 8
+      Width = 121
+      Height = 81
+      Cursor = crHandPoint
+      Hint = #1047#1072#1087#1091#1089#1090#1080#1090#1100' '#1080#1075#1088#1091
+      Brush.Color = clLime
+      Shape = stRoundRect
+      OnMouseUp = shpRunMouseUp
+    end
+    object shpClose: TShape
+      Left = 336
+      Top = 8
+      Width = 121
+      Height = 81
+      Cursor = crHandPoint
+      Hint = #1042#1099#1093#1086#1076' '#1080#1079' '#1087#1088#1086#1075#1088#1072#1084#1084#1099
+      Brush.Color = clRed
+      Shape = stRoundRect
+      OnMouseUp = shpCloseMouseUp
+    end
+    object gpbClient: TGroupBox
+      Left = 8
+      Top = 8
+      Width = 185
+      Height = 81
+      Caption = ' '#1050#1083#1080#1077#1085#1090' '
+      TabOrder = 0
+      object cbbBrowser: TComboBox
+        Left = 8
+        Top = 24
+        Width = 169
+        Height = 27
+        Style = csDropDownList
+        Color = 12339
+        ItemHeight = 19
+        TabOrder = 0
+      end
+      object ckbFlashPlayer: TCheckBox
+        Left = 8
+        Top = 56
+        Width = 97
+        Height = 17
+        Caption = 'Flash Player'
+        TabOrder = 1
+        OnClick = ckbFlashPlayerClick
+      end
+    end
+    object rdgServers: TRadioGroup
+      Left = 8
+      Top = 96
+      Width = 449
+      Height = 281
+      Caption = ' '#1057#1087#1080#1089#1086#1082' '#1089#1077#1088#1074#1077#1088#1086#1074' '
+      Columns = 3
+      Items.Strings = (
+        #1057#1077#1088#1074#1077#1088' 0'
+        #1057#1077#1088#1074#1077#1088' 1'
+        #1057#1077#1088#1074#1077#1088' 2'
+        #1057#1077#1088#1074#1077#1088' 3'
+        #1057#1077#1088#1074#1077#1088' 4'
+        #1057#1077#1088#1074#1077#1088' 5'
+        #1057#1077#1088#1074#1077#1088' 6'
+        #1057#1077#1088#1074#1077#1088' 7'
+        #1057#1077#1088#1074#1077#1088' 8'
+        #1057#1077#1088#1074#1077#1088' 9'
+        #1057#1077#1088#1074#1077#1088' 10'
+        #1057#1077#1088#1074#1077#1088' 11'
+        #1057#1077#1088#1074#1077#1088' 12'
+        #1057#1077#1088#1074#1077#1088' 13'
+        #1057#1077#1088#1074#1077#1088' 14'
+        #1057#1077#1088#1074#1077#1088' 15'
+        #1057#1077#1088#1074#1077#1088' 16'
+        #1057#1077#1088#1074#1077#1088' 17'
+        #1057#1077#1088#1074#1077#1088' 18'
+        #1057#1077#1088#1074#1077#1088' 19'
+        #1057#1077#1088#1074#1077#1088' 20'
+        #1057#1077#1088#1074#1077#1088' 21'
+        #1057#1077#1088#1074#1077#1088' 22'
+        #1057#1077#1088#1074#1077#1088' 23'
+        #1057#1077#1088#1074#1077#1088' 24'
+        #1057#1077#1088#1074#1077#1088' 25'
+        #1057#1077#1088#1074#1077#1088' 26'
+        #1057#1077#1088#1074#1077#1088' 27'
+        #1057#1077#1088#1074#1077#1088' 28'
+        #1057#1077#1088#1074#1077#1088' 29'
+        #1057#1077#1088#1074#1077#1088' 30'
+        #1057#1077#1088#1074#1077#1088' 31')
+      TabOrder = 1
+    end
   end
 end

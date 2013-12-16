@@ -4,21 +4,32 @@ interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, OleCtrls, ShockwaveFlashObjects_TLB, StdCtrls;
+	Dialogs, OleCtrls, ShockwaveFlashObjects_TLB, StdCtrls, ExtCtrls;
 
 type
 	TMainForm = class(TForm)
 		swfBanner: TShockwaveFlash;
-		sttRegInfo: TStaticText;
-		btnCreateKey: TButton;
+		Panel: TPanel;
+		gpbClient: TGroupBox;
+		cbbBrowser: TComboBox;
+		ckbFlashPlayer: TCheckBox;
+		rdgServers: TRadioGroup;
+		shpRun: TShape;
+		shpClose: TShape;
 		procedure FormCreate(Sender: TObject);
-		procedure btnCreateKeyClick(Sender: TObject);
+		procedure ckbFlashPlayerClick(Sender: TObject);
+		procedure shpRunMouseUp(Sender: TObject; Button: TMouseButton;
+			Shift: TShiftState; X, Y: Integer);
+		procedure shpCloseMouseUp(Sender: TObject; Button: TMouseButton;
+			Shift: TShiftState; X, Y: Integer);
 	private
 		FAppPath: string;
-		function XorCoding(const Data, Key: string): string;
+		FFlashPlayer: string;
 	public
-		function IsReg: Boolean;
+		BrowsersList: array of string;
+		procedure ScanBrowsers;
 		property AppPath: string read FAppPath write FAppPath;
+		property FlashPlayer: string read FFlashPlayer write FFlashPlayer;
 	end;
 
 var
@@ -26,75 +37,79 @@ var
 
 implementation
 
-uses Math;
+uses Registry, ShellAPI;
 
 {$R *.dfm}
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
 	AppPath := ExtractFilePath(Application.ExeName);
-	with sttRegInfo do if IsReg then begin
-		Font.Color := clGreen;
-	end else begin
-		Font.Color := clRed;
-		Caption := 'Программа не зарегистрирована!';
-	end;
+	ScanBrowsers;
 end;
 
-function TMainForm.IsReg: Boolean;
-var
-	RegFile: TextFile;
-	ProgramName, User, Company: string;
+procedure TMainForm.ckbFlashPlayerClick(Sender: TObject);
 begin
-	Result := False;
-	if FileExists(AppPath + 'Test.key') then begin
-		AssignFile(RegFile, AppPath + 'Test.key');
-		Reset(RegFile);
-		ReadLn(RegFile, ProgramName);
-		ReadLn(RegFile, User);
-		ReadLn(RegFile, Company);
-		CloseFile(RegFile);
-		if XorCoding(ProgramName, 'BlaiddDrwg') = 'TO Server List' then begin
-			Result := True;
-			sttRegInfo.Caption := 'Программа зарегистрирована на ' + XorCoding(User, 'BlaiddDrwg') + ' из ' + XorCoding(Company, 'BlaiddDrwg');
-			sttRegInfo.Hint := sttRegInfo.Caption;
-			ShowMessage(XorCoding(ProgramName, 'BlaiddDrwg'));
-			ShowMessage(XorCoding(User, 'BlaiddDrwg'));
-			ShowMessage(XorCoding(Company, 'BlaiddDrwg'));
-		end;
-	end;
+	cbbBrowser.Enabled := not ckbFlashPlayer.Checked;
 end;
 
-procedure TMainForm.btnCreateKeyClick(Sender: TObject);
+procedure TMainForm.ScanBrowsers;
 const
-	ProgramName = 'TO Server List';
-	User = 'Megadragon';
-	Company = 'Phoenix Lab';
-	Password = 'BlaiddDrwg';
+	SHELL_OPEN_COMMAND = 'shell\open\command';
+	START_MENU_INTERNET = 'SOFTWARE\Clients\StartMenuInternet';
 var
-	KeyFile: TextFile;
+	Reg: TRegistry;
+	Info: TRegKeyInfo;
+	List: TStringList;
+	I: Byte;
 begin
-	AssignFile(KeyFile, AppPath + 'Test.key');
-	Rewrite(KeyFile);
-	WriteLn(KeyFile, XorCoding(ProgramName, Password));
-	WriteLn(KeyFile, XorCoding(User, Password));
-	WriteLn(KeyFile, XorCoding(Company, Password));
-	CloseFile(KeyFile);
+	Reg := TRegistry.Create;
+	List := TStringList.Create;
+	with Reg do try
+		RootKey := HKEY_LOCAL_MACHINE;
+		OpenKey(START_MENU_INTERNET, False);
+		GetKeyInfo(Info);
+		SetLength(BrowsersList, Info.NumSubKeys);
+		GetKeyNames(List);
+		CloseKey;
+		for I := 0 to Length(BrowsersList) - 1 do begin
+			OpenKey(START_MENU_INTERNET + '\' + List[I], False);
+			cbbBrowser.Items.Add(ReadString(''));
+			CloseKey;
+			OpenKey(START_MENU_INTERNET + '\' + List[I] + '\' + SHELL_OPEN_COMMAND, False);
+			BrowsersList[I] := ReadString('');
+			CloseKey;
+			if cbbBrowser.Items[I] = '' then cbbBrowser.Items[I] := BrowsersList[I];
+		end;
+	finally
+		List.Free;
+		Free;
+	end;
 end;
 
-function TMainForm.XorCoding(const Data, Key: string): string;
+procedure TMainForm.shpRunMouseUp(Sender: TObject; Button: TMouseButton;
+	Shift: TShiftState; X, Y: Integer);
 var
-	I, Len: Word;
-	CryptKey: string;
+	App, Param: string;
 begin
-	Len := Length(Data);
-	CryptKey := '';
-	repeat
-		CryptKey := CryptKey + Key;
-	until Length(CryptKey) >= Len;
-	CryptKey := Copy(CryptKey, 1, Len);
-	SetLength(Result, Len);
-	for I := 1 to Len do Result[I] := Chr(Ord(Data[I]) xor Ord(CryptKey[I]));
+	if ckbFlashPlayer.Checked then begin
+		App := AppPath + 'FlashPlayer.exe';
+		Param := 'http://tankionline.com/AlternativaLoader.swf?config=c'
+			+ IntToStr(rdgServers.ItemIndex)
+			+ '.tankionline.com/config.xml&resources=s.tankionline.com&lang=ru&locale=ru&friend=d0068ec30';
+	end else begin
+		App := BrowsersList[cbbBrowser.ItemIndex];
+		Param := 'http://tankionline.com/battle-ru'
+			+ IntToStr(rdgServers.ItemIndex) + '.html#friend=d0068ec30';
+	end;
+	ShowMessage(App + #13#10 + Param);
+	ShellExecute(0, 'Open', PChar(App), PChar(Param), '', SW_SHOWMAXIMIZED);
+	Close;
+end;
+
+procedure TMainForm.shpCloseMouseUp(Sender: TObject; Button: TMouseButton;
+	Shift: TShiftState; X, Y: Integer);
+begin
+	Close;
 end;
 
 end.
