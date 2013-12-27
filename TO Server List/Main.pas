@@ -101,7 +101,6 @@ begin
 		Param := 'http://tankionline.com/battle-ru'
 			+ IntToStr(rdgServers.ItemIndex) + '.html#friend=d0068ec30';
 	end;
-	ShowMessage(App + #13#10 + Param);
 	ShellExecute(0, 'Open', PChar(App), PChar(Param), '', SW_SHOWMAXIMIZED);
 	Close;
 end;
