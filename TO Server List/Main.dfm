@@ -64,7 +64,7 @@ object MainForm: TMainForm
     ShowHint = True
     TabOrder = 1
     object shpRun: TShape
-      Left = 200
+      Left = 208
       Top = 8
       Width = 121
       Height = 81
@@ -88,14 +88,14 @@ object MainForm: TMainForm
     object gpbClient: TGroupBox
       Left = 8
       Top = 8
-      Width = 185
+      Width = 193
       Height = 81
       Caption = ' '#1050#1083#1080#1077#1085#1090' '
       TabOrder = 0
       object cbbBrowser: TComboBox
         Left = 8
         Top = 24
-        Width = 169
+        Width = 177
         Height = 27
         Style = csDropDownList
         Color = 12339

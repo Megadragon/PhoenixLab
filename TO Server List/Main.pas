@@ -63,25 +63,29 @@ var
 	I: Byte;
 begin
 	Reg := TRegistry.Create;
-	List := TStringList.Create;
 	with Reg do try
-		RootKey := HKEY_LOCAL_MACHINE;
-		OpenKey(START_MENU_INTERNET, False);
-		GetKeyInfo(Info);
-		SetLength(BrowsersList, Info.NumSubKeys);
-		GetKeyNames(List);
-		CloseKey;
-		for I := 0 to Length(BrowsersList) - 1 do begin
-			OpenKey(START_MENU_INTERNET + '\' + List[I], False);
-			cbbBrowser.Items.Add(ReadString(''));
-			CloseKey;
-			OpenKey(START_MENU_INTERNET + '\' + List[I] + '\' + SHELL_OPEN_COMMAND, False);
-			BrowsersList[I] := ReadString('');
-			CloseKey;
-			if cbbBrowser.Items[I] = '' then cbbBrowser.Items[I] := BrowsersList[I];
+		List := TStringList.Create;
+		try
+			RootKey := HKEY_LOCAL_MACHINE;
+			if OpenKey(START_MENU_INTERNET, False) and GetKeyInfo(Info) then begin
+				SetLength(BrowsersList, Info.NumSubKeys);
+				GetKeyNames(List);
+				CloseKey;
+				for I := 0 to Length(BrowsersList) - 1 do
+					if OpenKey(START_MENU_INTERNET + '\' + List[I], False) then begin
+						cbbBrowser.Items.Add(ReadString(''));
+						CloseKey;
+						if OpenKey(START_MENU_INTERNET + '\' + List[I] + '\' + SHELL_OPEN_COMMAND, False) then begin
+							BrowsersList[I] := ReadString('');
+							CloseKey;
+						end;
+						if cbbBrowser.Items[I] = '' then cbbBrowser.Items[I] := BrowsersList[I];
+					end;
+			end;
+		finally
+			List.Free;
 		end;
 	finally
-		List.Free;
 		Free;
 	end;
 end;
@@ -91,12 +95,14 @@ procedure TMainForm.shpRunMouseUp(Sender: TObject; Button: TMouseButton;
 var
 	App, Param: string;
 begin
+	if rdgServers.ItemIndex < 0 then raise Exception.Create('Сервер не выбран!');
 	if ckbFlashPlayer.Checked then begin
 		App := AppPath + 'FlashPlayer.exe';
 		Param := 'http://tankionline.com/AlternativaLoader.swf?config=c'
 			+ IntToStr(rdgServers.ItemIndex)
 			+ '.tankionline.com/config.xml&resources=s.tankionline.com&lang=ru&locale=ru&friend=d0068ec30';
-	end else begin
+	end else if cbbBrowser.ItemIndex < 0 then raise Exception.Create('Браузер не выбран!')
+	else begin
 		App := BrowsersList[cbbBrowser.ItemIndex];
 		Param := 'http://tankionline.com/battle-ru'
 			+ IntToStr(rdgServers.ItemIndex) + '.html#friend=d0068ec30';
