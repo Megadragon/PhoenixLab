@@ -2175,7 +2175,7 @@ object AboutBox: TAboutBox
       Top = 32
       Width = 104
       Height = 19
-      Caption = #1042#1077#1088#1089#1080#1103' 2.2.2.43'
+      Caption = #1042#1077#1088#1089#1080#1103' 2.2.3.44'
       IsControl = True
     end
     object Copyright: TLabel
@@ -2183,13 +2183,13 @@ object AboutBox: TAboutBox
       Top = 56
       Width = 134
       Height = 19
-      Caption = 'Copyright '#169' 2009-13'
+      Caption = 'Copyright '#169' 2009-14'
       IsControl = True
     end
     object Comments: TLabel
       Left = 144
       Top = 80
-      Width = 133
+      Width = 132
       Height = 15
       Caption = #1040#1074#1090#1086#1088': '#1040#1085#1090#1086#1085' '#1053#1080#1082#1086#1083#1072#1077#1074
       Font.Charset = DEFAULT_CHARSET
@@ -2204,9 +2204,9 @@ object AboutBox: TAboutBox
     object Remarks: TLabel
       Left = 144
       Top = 96
-      Width = 110
+      Width = 145
       Height = 30
-      Caption = #1052#1086#1076#1077#1088#1085#1080#1079#1080#1088#1086#1074#1072#1085#1086': Phoenix Lab'
+      Caption = #1052#1086#1076#1077#1088#1085#1080#1079#1080#1088#1086#1074#1072#1085#1086': Megadragon (Phoenix Lab)'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -13

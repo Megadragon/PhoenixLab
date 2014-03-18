@@ -66,8 +66,8 @@ object MainForm: TMainForm
     Tag = -1
     Left = 0
     Top = 0
-    Width = 204
-    Height = 481
+    Width = 196
+    Height = 475
     Style = lbOwnerDrawVariable
     Align = alClient
     Font.Charset = DEFAULT_CHARSET

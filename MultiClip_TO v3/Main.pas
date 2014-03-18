@@ -131,8 +131,12 @@ end;
 procedure SendCommand(const Number: Byte; const IsTeamChat: Boolean);
 var
 	IsWindowFound: Boolean;
+	CurrKbdLayout: HKL;
 begin
+	CurrKbdLayout := GetKeyboardLayout(0);
+	ActivateKeyboardLayout($0419, KLF_ACTIVATE);
 	Clipboard.AsText := Commands[Number].Text;
+	ActivateKeyboardLayout(CurrKbdLayout, KLF_ACTIVATE);
 	if TargetWndName > '' then IsWindowFound := hActiveWnd = FindWindow(nil, @TargetWndName)
 	else IsWindowFound := hActiveWnd > 0;
 	SetForegroundWindow(hActiveWnd);
