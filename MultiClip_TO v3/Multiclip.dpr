@@ -1,9 +1,11 @@
 program Multiclip;
 
 uses
-	Forms, Windows,
-	Main in 'Main.pas' {MainForm},
-	About in 'About.pas' {AboutBox};
+	Forms,
+	Windows,
+	uMain in 'uMain.pas' {MainForm},
+	uAbout in 'uAbout.pas' {AboutBox},
+	uCommandList in 'uCommandList.pas';
 
 {$R *.res}
 
@@ -27,10 +29,6 @@ begin
 	Application.CreateForm(TMainForm, MainForm);
 	Application.CreateForm(TAboutBox, AboutBox);
 	Application.ShowMainForm := False;
-	MainForm.LoadFromIni;
-	MainForm.LoadCommands;
-	MainForm.Restore(True);
-	MainForm.Visible := True;
 	MainForm.ctiTrayIcon.HideTaskbarIcon;
 	Application.Run;
 	ReleaseMutex(hMutex);

@@ -2175,12 +2175,12 @@ object AboutBox: TAboutBox
       Top = 32
       Width = 104
       Height = 19
-      Caption = #1042#1077#1088#1089#1080#1103' 2.2.3.44'
+      Caption = #1042#1077#1088#1089#1080#1103' 2.3.1.46'
       IsControl = True
     end
     object Copyright: TLabel
       Left = 144
-      Top = 56
+      Top = 64
       Width = 134
       Height = 19
       Caption = 'Copyright '#169' 2009-14'
@@ -2188,32 +2188,40 @@ object AboutBox: TAboutBox
     end
     object Comments: TLabel
       Left = 144
-      Top = 80
+      Top = 96
       Width = 132
       Height = 15
+      Cursor = crHandPoint
       Caption = #1040#1074#1090#1086#1088': '#1040#1085#1090#1086#1085' '#1053#1080#1082#1086#1083#1072#1077#1074
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
+      Font.Color = clBlue
       Font.Height = -13
       Font.Name = 'Times New Roman'
-      Font.Style = []
+      Font.Style = [fsUnderline]
       ParentFont = False
       WordWrap = True
+      OnClick = CommentsClick
+      OnMouseEnter = CommentsMouseEnter
+      OnMouseLeave = CommentsMouseLeave
       IsControl = True
     end
     object Remarks: TLabel
       Left = 144
-      Top = 96
-      Width = 145
-      Height = 30
-      Caption = #1052#1086#1076#1077#1088#1085#1080#1079#1080#1088#1086#1074#1072#1085#1086': Megadragon (Phoenix Lab)'
+      Top = 112
+      Width = 133
+      Height = 15
+      Cursor = crHandPoint
+      Caption = #1059#1083#1091#1095#1096#1077#1085#1086': Megadragon'
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
+      Font.Color = clBlue
       Font.Height = -13
       Font.Name = 'Times New Roman'
-      Font.Style = []
+      Font.Style = [fsUnderline]
       ParentFont = False
       WordWrap = True
+      OnClick = RemarksClick
+      OnMouseEnter = RemarksMouseEnter
+      OnMouseLeave = RemarksMouseLeave
     end
   end
   object OKButton: TButton

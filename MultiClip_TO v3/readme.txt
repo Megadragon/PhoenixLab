@@ -1,5 +1,5 @@
 Мультишаблон для чата в tankionline.com
-20140318 Версия 2.2.3.44
+20140501 Версия 2.3.1.46
 
 Цель – облегчить ввод сообщений путем выбора готовых ответов.
 
@@ -42,7 +42,7 @@ Anton Nikolaev
 E-mail: Antynik@yandex.ru
 Ник в танчиках: test12
 
-Редактировано и улучшено (версии 1.9, 2.0, 2.1 и 2.2 в change.log):
-Sergey Globov
-E-mail: Glossit@2upost.com
+Редактировано и улучшено (версии 1.9 и последующие в change.log):
+Megadragon
+E-mail: ssglobov@gmail.com
 Позывной: SS_Alpha-1

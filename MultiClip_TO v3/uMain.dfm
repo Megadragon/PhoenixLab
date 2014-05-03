@@ -55,6 +55,7 @@ object MainForm: TMainForm
   OldCreateOrder = False
   ScreenSnap = True
   SnapBuffer = 40
+  Visible = True
   OnCanResize = FormCanResize
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -679,8 +680,8 @@ object MainForm: TMainForm
   end
   object popPopupMenu: TPopupMenu
     MenuAnimation = [maBottomToTop]
-    Left = 104
-    Top = 48
+    Left = 56
+    Top = 184
     object POnOff: TMenuItem
       Caption = #1042#1082#1083'. / '#1042#1099#1082#1083'.'
       Default = True
@@ -694,9 +695,5 @@ object MainForm: TMainForm
       Caption = #1042#1099#1093#1086#1076
       OnClick = PExitClick
     end
-  end
-  object XPM: TXPManifest
-    Left = 40
-    Top = 48
   end
 end

@@ -1,11 +1,10 @@
-unit Main;
+unit uMain;
 
 interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, StdCtrls, IniFiles, Menus, ExtCtrls, Clipbrd, CoolTrayIcon, ImgList,
-	XPMan, About;
+	Dialogs, StdCtrls, IniFiles, Menus, ExtCtrls, Clipbrd, CoolTrayIcon, ImgList;
 
 type
 	TMainForm = class(TForm)
@@ -18,7 +17,6 @@ type
 		PExit: TMenuItem;
 		tmrMouseLeave: TTimer;
 		tmrTargetWndActivate: TTimer;
-		XPM: TXPManifest;
 		procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer;
 			var Resize: Boolean);
 		procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -52,8 +50,9 @@ type
 		procedure LoadFromIni;
 		procedure Restore(const Forced: Boolean = False);
 		procedure SaveToIni;
+		procedure SendCommand(const Number: Byte; const IsTeamChat: Boolean);
 		procedure Shrink;
-		property AppPath: string read FAppPath write FAppPath;
+		property AppPath: string read FAppPath;
 	end;
 
 var
@@ -75,83 +74,10 @@ var
 
 implementation
 
+uses uAbout, uCommandList;
+
 {$R *.dfm}
-
-type
-	THotKey = packed record
-		Atom: Integer;
-		IsRegister: Boolean;
-		Shortcut: Cardinal;
-		Modifiers: Cardinal;
-		VirtualCode: Cardinal;
-		AsString: string;
-	end;
-
-	TCommand = packed record
-		IsDelay: Boolean;
-		Text: string;
-		hkTeam: THotKey;
-		hkGlobal: THotKey;
-	end;
-
-var
-	CommandCount: Byte;
-	Commands: array of TCommand;
-
-procedure RegHK;
-var
-	I: Byte;
-begin
-	for I := 0 to CommandCount - 1 do begin
-		if Commands[I].hkTeam.Atom > 0 then Commands[I].hkTeam.IsRegister :=
-			RegisterHotKey(MainForm.Handle, Commands[I].hkTeam.Atom, Commands[I].hkTeam.Modifiers, Commands[I].hkTeam.VirtualCode);
-		if Commands[I].hkGlobal.Atom > 0 then Commands[I].hkGlobal.IsRegister :=
-			RegisterHotKey(MainForm.Handle, Commands[I].hkGlobal.Atom, Commands[I].hkGlobal.Modifiers, Commands[I].hkGlobal.VirtualCode);
-	end;
-end;
-
-procedure UnregHK;
-var
-	I: Byte;
-begin
-	for I := 0 to CommandCount - 1 do begin
-		if (Commands[I].hkTeam.Atom > 0) and Commands[I].hkTeam.IsRegister then
-			UnregisterHotkey(MainForm.Handle, Commands[I].hkTeam.Atom);
-		if (Commands[I].hkGlobal.Atom > 0) and Commands[I].hkGlobal.IsRegister then
-			UnregisterHotkey(MainForm.Handle, Commands[I].hkGlobal.Atom);
-	end;
-end;
-
-procedure ClickKey(Key: Word);
-begin
-	keybd_event(Key, 0, 0, 0);
-	keybd_event(Key, 0, KEYEVENTF_KEYUP, 0);
-end;
-
-procedure SendCommand(const Number: Byte; const IsTeamChat: Boolean);
-var
-	IsWindowFound: Boolean;
-	CurrKbdLayout: HKL;
-begin
-	CurrKbdLayout := GetKeyboardLayout(0);
-	ActivateKeyboardLayout($0419, KLF_ACTIVATE);
-	Clipboard.AsText := Commands[Number].Text;
-	ActivateKeyboardLayout(CurrKbdLayout, KLF_ACTIVATE);
-	if TargetWndName > '' then IsWindowFound := hActiveWnd = FindWindow(nil, @TargetWndName)
-	else IsWindowFound := hActiveWnd > 0;
-	SetForegroundWindow(hActiveWnd);
-	if IsWindowFound then begin
-		Sleep(300);
-		if IsTeamChat then ClickKey(Ord('T')) else ClickKey(VK_RETURN);
-		Sleep(300);
-		keybd_event(VK_CONTROL, 0, 0, 0); // Press Ctrl
-		ClickKey(Ord('V'));
-		keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0); // Release Ctrl
-		if not Commands[Number].IsDelay then ClickKey(VK_RETURN);
-	end;
-end;
-
-{ TfrmMain }
+{$R WindowsXP.res}
 
 procedure TMainForm.FormCanResize(Sender: TObject;
 	var NewWidth, NewHeight: Integer; var Resize: Boolean);
@@ -175,20 +101,18 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-	AppPath := ExtractFilePath(Application.ExeName);
+	FAppPath := GetCurrentDir;
 	if IsAppWork then POnOff.Caption := 'Выключить'
 	else POnOff.Caption := 'Включить';
+	Commands := TCommandList.Create(AppPath + '\command.lst');
+	LoadFromIni;
+	LoadCommands;
+	Restore(True);
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
-var
-	I: Byte;
 begin
-	UnregHK;
-	for I := 0 to CommandCount - 1 do begin
-		if Commands[I].hkTeam.Atom > 0 then GlobalDeleteAtom(Commands[I].hkTeam.Atom);
-		if Commands[I].hkGlobal.Atom > 0 then GlobalDeleteAtom(Commands[I].hkGlobal.Atom);
-	end;
+	Commands.Free;
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
@@ -209,15 +133,15 @@ begin
 		Font.Height := FontSz;
 		Font.Color := clText;
 		FillRect(Rect);
-		TextOut(Rect.Left + 2, Rect.Top, Commands[Index].Text);
+		TextOut(Rect.Left + 2, Rect.Top, Commands.List[Index].Text);
 		Font.Height := HKFontSz;
-		if Commands[Index].hkTeam.IsRegister then Font.Color := clHKTeam else Font.Color := clRed;
-		hkWidth := TextWidth(Commands[Index].hkTeam.AsString);
-		if HKPos = 'Down' then TextOut(Rect.Left + 2, Rect.Bottom - HKFontSz, Commands[Index].hkTeam.AsString)
-		else TextOut(Rect.Right - hkWidth - 2, Rect.Top, Commands[Index].hkTeam.AsString);
-		if Commands[Index].hkGlobal.IsRegister then Font.Color := clHKGlobal else Font.Color := clRed;
-		hkWidth := TextWidth(Commands[Index].hkGlobal.AsString);
-		TextOut(Rect.Right - hkWidth - 2, Rect.Bottom - HKFontSz, Commands[Index].hkGlobal.AsString);
+		if Commands.List[Index].hkTeam.IsRegister then Font.Color := clHKTeam else Font.Color := clRed;
+		hkWidth := TextWidth(Commands.List[Index].hkTeam.AsString);
+		if HKPos = 'Down' then TextOut(Rect.Left + 2, Rect.Bottom - HKFontSz, Commands.List[Index].hkTeam.AsString)
+		else TextOut(Rect.Right - hkWidth - 2, Rect.Top, Commands.List[Index].hkTeam.AsString);
+		if Commands.List[Index].hkGlobal.IsRegister then Font.Color := clHKGlobal else Font.Color := clRed;
+		hkWidth := TextWidth(Commands.List[Index].hkGlobal.AsString);
+		TextOut(Rect.Right - hkWidth - 2, Rect.Bottom - HKFontSz, Commands.List[Index].hkGlobal.AsString);
 		Brush.Color := clWhite;
 		Font.Color := clBlack;
 	end;
@@ -253,7 +177,7 @@ begin
 	with lsbCommands do begin
 		ItemIndex := ItemAtPos(Point(X, Y), True);
 		if (Tag >= 0) and (Tag <> ItemIndex) then
-			lsbCommandsDrawItem(nil, Tag, ItemRect(Tag), [odDefault]);
+			lsbCommandsDrawItem(lsbCommands, Tag, ItemRect(Tag), [odDefault]);
 		Tag := ItemIndex;
 	end;
 	tmrMouseLeave.Enabled := True;
@@ -269,13 +193,13 @@ procedure TMainForm.POnOffClick(Sender: TObject);
 begin
 	if IsAppWork then begin
 		ctiTrayIcon.IconIndex := 0;
-		Hide;
-		UnregHK;
+		ctiTrayIcon.HideMainForm;
+		Commands.UnregHK;
 		POnOff.Caption := 'Включить';
 	end else begin
 		ctiTrayIcon.IconIndex := 1;
-		RegHK;
-		Show;
+		Commands.RegHK;
+		ctiTrayIcon.ShowMainForm;
 		POnOff.Caption := 'Выключить';
 	end;
 	IsAppWork := not IsAppWork;
@@ -304,7 +228,7 @@ var
 begin
 	H := GetForegroundWindow;
 	if H <> Handle then hActiveWnd := H;
-	if (Tag >= 0) and (Commands[Tag].Text > '')
+	if (Tag >= 0) and (Commands.List[Tag].Text > '')
 		and (GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0)
 	then begin
 		SendCommand(Tag, IsTeamHotkey);
@@ -313,7 +237,7 @@ begin
 	end;
 end;
 
-{ TfrmMain.private }
+{ Windows messages }
 
 procedure TMainForm.WMEnterSizeMove(var Msg: TMessage);
 begin
@@ -331,13 +255,13 @@ var
 begin
 	inherited;
 	tmrTargetWndActivate.Interval := 100;
-	for I := 0 to CommandCount - 1 do begin
-		if Msg.HotKey = Commands[I].hkTeam.Atom then begin
+	for I := 0 to Commands.Count - 1 do begin
+		if Msg.HotKey = Commands.List[I].hkTeam.Atom then begin
 			Tag := I;
 			IsTeamHotkey := True;
 			Break;
 		end;
-		if Msg.HotKey = Commands[I].hkGlobal.Atom then begin
+		if Msg.HotKey = Commands.List[I].hkGlobal.Atom then begin
 			Tag := I;
 			IsTeamHotkey := False;
 			Break;
@@ -361,66 +285,22 @@ begin
 	end;
 end;
 
-{ TfrmMain.public }
+{ Secondary procedures }
 
 procedure TMainForm.LoadCommands;
 var
-	I, J: Byte;
-	Buffer: string;
+	I: Word;
 begin
-	if FileExists(AppPath + 'command.lst') then begin
-		lsbCommands.Items.LoadFromFile(AppPath + 'command.lst');
-		CommandCount := lsbCommands.Count;
-		SetLength(Commands, CommandCount);
-		ClientHeight := lsbCommands.ItemRect(CommandCount - 1).Bottom + 4;
-		if Height > Screen.Height then Height := Screen.Height;
-		for I := 0 to CommandCount - 1 do begin
-			Commands[I].hkTeam.Atom := 0;
-			Commands[I].hkTeam.IsRegister := False;
-			Commands[I].hkGlobal.Atom := 0;
-			Commands[I].hkGlobal.IsRegister := False;
-			Buffer := lsbCommands.Items[I];
-			if Buffer = '' then Continue;
-			Commands[I].IsDelay := Buffer[1] = '%';
-			if Commands[I].IsDelay then Delete(Buffer, 1, 1);
-			J := Pos(#9, Buffer);
-			if J > 0 then begin
-				Commands[I].Text := Copy(Buffer, 1, J - 1);
-				Delete(Buffer, 1, J);
-				J := Pos(#9, Buffer);
-				if J > 0 then begin
-					Commands[I].hkTeam.AsString := Copy(Buffer, 1, J - 1);
-					Delete(Buffer, 1, J);
-					Commands[I].hkGlobal.AsString := Buffer;
-				end else Commands[I].hkTeam.AsString := Buffer;
-				Commands[I].hkTeam.Shortcut := TextToShortCut(Commands[I].hkTeam.AsString);
-				if Commands[I].hkTeam.Shortcut > 0 then begin
-					Commands[I].hkTeam.Atom := GlobalAddAtom(PAnsiChar('T' + IntToStr(I)));
-					Commands[I].hkTeam.Modifiers := 0;
-					if (Commands[I].hkTeam.Shortcut and scShift) <> 0 then Commands[I].hkTeam.Modifiers := Commands[I].hkTeam.Modifiers or MOD_SHIFT;
-					if (Commands[I].hkTeam.Shortcut and scAlt) <> 0 then Commands[I].hkTeam.Modifiers := Commands[I].hkTeam.Modifiers or MOD_ALT;
-					if (Commands[I].hkTeam.Shortcut and scCtrl) <> 0 then Commands[I].hkTeam.Modifiers := Commands[I].hkTeam.Modifiers or MOD_CONTROL;
-					Commands[I].hkTeam.VirtualCode := LOBYTE(Commands[I].hkTeam.Shortcut);
-				end;
-				Commands[I].hkGlobal.Shortcut := TextToShortCut(Commands[I].hkGlobal.AsString);
-				if Commands[I].hkGlobal.Shortcut > 0 then begin
-					Commands[I].hkGlobal.Atom := GlobalAddAtom(PAnsiChar('G' + IntToStr(I)));
-					Commands[I].hkGlobal.Modifiers := 0;
-					if (Commands[I].hkGlobal.Shortcut and scShift) <> 0 then Commands[I].hkGlobal.Modifiers := Commands[I].hkGlobal.Modifiers or MOD_SHIFT;
-					if (Commands[I].hkGlobal.Shortcut and scAlt) <> 0 then Commands[I].hkGlobal.Modifiers := Commands[I].hkGlobal.Modifiers or MOD_ALT;
-					if (Commands[I].hkGlobal.Shortcut and scCtrl) <> 0 then Commands[I].hkGlobal.Modifiers := Commands[I].hkGlobal.Modifiers or MOD_CONTROL;
-					Commands[I].hkGlobal.VirtualCode := LOBYTE(Commands[I].hkGlobal.Shortcut);
-				end;
-			end else Commands[I].Text := Buffer;
-		end;
-		RegHK;
-	end else Close;
+	for I := 0 to Commands.Count - 1 do
+		lsbCommands.Items.Add(Commands.List[I].Text);
+	ClientHeight := lsbCommands.ItemRect(Commands.Count - 1).Bottom + 4;
+	if Height > Screen.Height then Height := Screen.Height;
 	ctiTrayIcon.IconIndex := 1;
 end;
 
 procedure TMainForm.LoadFromIni;
 begin
-	with TIniFile.Create(AppPath + 'config.cfg') do try
+	with TIniFile.Create(AppPath + '\config.cfg') do try
 		Left := ReadInteger('Settings', 'Left', Left);
 		Top := ReadInteger('Settings', 'Top', Top);
 		WidthMin := ReadInteger('Settings', 'WidthMin', 35);
@@ -462,26 +342,50 @@ end;
 
 procedure TMainForm.SaveToIni;
 begin
-	with TIniFile.Create(AppPath + 'config.cfg') do try
-		WriteInteger('Settings', 'Left', Left);
-		WriteInteger('Settings', 'Top', Top);
-		WriteInteger('Settings', 'WidthMin', WidthMin);
-		WriteInteger('Settings', 'WidthMax', WidthMax);
-		WriteInteger('Settings', 'AlphaBlendValue', AlphaBlendValue);
-		WriteInteger('Settings', 'DelayBeforeMinimize', tmrMouseLeave.Interval);
-		WriteInteger('Settings', 'FontSize', FontSz);
-		WriteInteger('Settings', 'HKFontSize', HKFontSz);
-		WriteString('Settings', 'HKPosition', HKPos);
-		WriteString('Settings', 'WindowPosition', WndPos);
-		WriteString('Settings', 'TargetWindowName', TargetWndName);
-		WriteString('Colors', 'List', ColorToString(clList));
-		WriteString('Colors', 'Selected', ColorToString(clSelected));
-		WriteString('Colors', 'Text', ColorToString(clText));
-		WriteString('Colors', 'HKTeam', ColorToString(clHKTeam));
-		WriteString('Colors', 'HKGlobal', ColorToString(clHKGlobal));
-		WriteString('Colors', 'Separator', ColorToString(clSeparator));
+	with TIniFile.Create(AppPath + '\config.cfg') do try
+		if Left <> ReadInteger('Settings', 'Left', 0) then
+			WriteInteger('Settings', 'Left', Left);
+		if Top <> ReadInteger('Settings', 'Top', 0) then
+			WriteInteger('Settings', 'Top', Top);
+		if WidthMin <> ReadInteger('Settings', 'WidthMin', 0) then
+			WriteInteger('Settings', 'WidthMin', WidthMin);
+		if WidthMax <> ReadInteger('Settings', 'WidthMax', 0) then
+			WriteInteger('Settings', 'WidthMax', WidthMax);
+		if WndPos <> ReadString('Settings', 'WindowPosition', '') then
+			WriteString('Settings', 'WindowPosition', WndPos);
 	finally
 		Free;
+	end;
+end;
+
+procedure TMainForm.SendCommand(const Number: Byte; const IsTeamChat: Boolean);
+var
+	IsWindowFound: Boolean;
+	CurrKbdLayout: HKL;
+
+	procedure ClickKey(Key: Word);
+	begin
+		keybd_event(Key, MapVirtualKey(Key, 0), 0, 0);
+		keybd_event(Key, MapVirtualKey(Key, 0), KEYEVENTF_KEYUP, 0);
+	end;
+
+begin
+	CurrKbdLayout := GetKeyboardLayout(0);
+	ActivateKeyboardLayout($0419, KLF_ACTIVATE);
+	Clipboard.AsText := Commands.List[Number].Text;
+	ActivateKeyboardLayout(CurrKbdLayout, KLF_ACTIVATE);
+	if TargetWndName > '' then
+		IsWindowFound := hActiveWnd = FindWindow(nil, @TargetWndName)
+	else IsWindowFound := hActiveWnd > 0;
+	SetForegroundWindow(hActiveWnd);
+	if IsWindowFound then begin
+		Sleep(300);
+		if IsTeamChat then ClickKey(Ord('T')) else ClickKey(VK_RETURN);
+		Sleep(300);
+		keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0); // Press Ctrl
+		ClickKey(Ord('V'));
+		keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0); // Release Ctrl
+		if not Commands.List[Number].IsDelay then ClickKey(VK_RETURN);
 	end;
 end;
 
