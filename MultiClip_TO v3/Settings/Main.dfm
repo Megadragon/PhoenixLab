@@ -2143,7 +2143,6 @@ object frmSettings: TfrmSettings
     Width = 225
     Height = 225
     Anchors = [akLeft, akTop, akRight, akBottom]
-    Shape = bsFrame
   end
   object lblAlphaBlend: TLabel
     Left = 16
@@ -2296,9 +2295,5 @@ object frmSettings: TfrmSettings
     EditLabel.Height = 13
     EditLabel.Caption = #1047#1072#1075#1086#1083#1086#1074#1086#1082' '#1094#1077#1083#1077#1074#1086#1075#1086' '#1086#1082#1085#1072
     TabOrder = 9
-  end
-  object XPM: TXPManifest
-    Left = 256
-    Top = 16
   end
 end

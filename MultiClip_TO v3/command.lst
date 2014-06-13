@@ -8,16 +8,16 @@
 %Мина!	Ctrl+F1
 %Шафт!	Ctrl+F2
 %Нужна Изида!	Ctrl+F3
-Не стрелять!	Ctrl+F4
+Не стрелять!	Ctrl+F4	Ctrl+Alt+F4
 Атака с левого фланга!	Ctrl+F5
 Атака по центру!	Ctrl+F6
 Атака с правого фланга!	Ctrl+F7
 Атака сверху!	Ctrl+F8
 Атака снизу!	Ctrl+F9
 
-Так точно!	Shift+F1
-Никак нет!	Shift+F2
-Выполняю.	Shift+F3
-Прошу прощения.	Shift+F4
+Так точно!	Shift+F1	Shift+Alt+F1
+Никак нет!	Shift+F2	Shift+Alt+F2
+Выполняю.	Shift+F3	Shift+Alt+F3
+Прошу прощения.	Shift+F4	Shift+Alt+F4
 Отличный выстрел!	Shift+F5
 Слишком долго!	Shift+F6

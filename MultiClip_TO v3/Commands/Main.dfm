@@ -27,7 +27,6 @@ object frmCommands: TfrmCommands
     Width = 193
     Height = 74
     Anchors = [akTop, akRight, akBottom]
-    Shape = bsFrame
   end
   object bbnOK: TBitBtn
     Left = 232
@@ -166,9 +165,5 @@ object frmCommands: TfrmCommands
     Caption = #1059#1076#1072#1083#1080#1090#1100' '#1089#1090#1088#1086#1082#1091
     TabOrder = 3
     OnClick = btnDeleteClick
-  end
-  object XPM: TXPManifest
-    Left = 32
-    Top = 32
   end
 end

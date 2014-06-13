@@ -4,7 +4,7 @@ interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, IniFiles, StdCtrls, ExtCtrls, Buttons, Spin, XPMan;
+	Dialogs, IniFiles, StdCtrls, ExtCtrls, Buttons, Spin;
 
 type
 	TfrmSettings = class(TForm)
@@ -26,15 +26,9 @@ type
 		lbeTargetWnd: TLabeledEdit;
 		bbnOK: TBitBtn;
 		bbnCancel: TBitBtn;
-		XPM: TXPManifest;
 		procedure FormCreate(Sender: TObject);
 		procedure bbnOKClick(Sender: TObject);
 		procedure bbnCancelClick(Sender: TObject);
-	private
-		FAppPath: string;
-	public
-		flConfig: TIniFile;
-		property AppPath: string read FAppPath write FAppPath;
 	end;
 
 var
@@ -43,12 +37,11 @@ var
 implementation
 
 {$R *.dfm}
+{$R WindowsXP.res}
 
 procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
-	AppPath := ExtractFilePath(Application.ExeName);
-	flConfig := TIniFile.Create(AppPath + 'config.cfg');
-	with flConfig do begin
+	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
 		speWidthMin.Value := ReadInteger('Settings', 'WidthMin', 50);
 		speAlphaBlend.Value := ReadInteger('Settings', 'AlphaBlendValue', 160);
 		speDelay.Value := ReadInteger('Settings', 'DelayBeforeMinimize', 1000);
@@ -57,12 +50,14 @@ begin
 		cbbHKPos.Text := ReadString('Settings', 'HKPosition', 'Right');
 		cbbWndPos.Text := ReadString('Settings', 'WindowPosition', 'Right');
 		lbeTargetWnd.Text := ReadString('Settings', 'TargetWindowName', '');
+	finally
+		Free;
 	end;
 end;
 
 procedure TfrmSettings.bbnOKClick(Sender: TObject);
 begin
-	with flConfig do begin
+	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
 		WriteInteger('Settings', 'WidthMin', speWidthMin.Value);
 		WriteInteger('Settings', 'DelayBeforeMinimize', speDelay.Value);
 		WriteInteger('Settings', 'AlphaBlendValue', speAlphaBlend.Value);
@@ -71,6 +66,7 @@ begin
 		WriteString('Settings', 'HKPosition', cbbHKPos.Text);
 		WriteString('Settings', 'WindowPosition', cbbWndPos.Text);
 		WriteString('Settings', 'TargetWindowName', lbeTargetWnd.Text);
+	finally
 		Free;
 	end;
 	Close;

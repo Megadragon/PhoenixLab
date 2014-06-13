@@ -1,8 +1,7 @@
 program Multiclip;
 
 uses
-	Forms,
-	Windows,
+	Forms, Windows,
 	uMain in 'uMain.pas' {MainForm},
 	uAbout in 'uAbout.pas' {AboutBox},
 	uCommandList in 'uCommandList.pas';
@@ -28,8 +27,7 @@ begin
 	Application.Title := 'Multiclip';
 	Application.CreateForm(TMainForm, MainForm);
 	Application.CreateForm(TAboutBox, AboutBox);
-	Application.ShowMainForm := False;
-	MainForm.ctiTrayIcon.HideTaskbarIcon;
+	ShowWindow(Application.Handle, SW_HIDE);
 	Application.Run;
 	ReleaseMutex(hMutex);
 end.

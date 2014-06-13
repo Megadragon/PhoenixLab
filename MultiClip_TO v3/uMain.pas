@@ -4,17 +4,16 @@ interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, StdCtrls, IniFiles, Menus, ExtCtrls, Clipbrd, CoolTrayIcon, ImgList;
+	Dialogs, StdCtrls, IniFiles, Menus, ExtCtrls, Clipbrd, ImgList;
 
 type
 	TMainForm = class(TForm)
-		ctiTrayIcon: TCoolTrayIcon;
-		imlIcons: TImageList;
+		mmuMenuBar: TMainMenu;
+		MenuFile: TMenuItem;
+		MFileExit: TMenuItem;
+		MenuHelp: TMenuItem;
+		MHelpAbout: TMenuItem;
 		lsbCommands: TListBox;
-		popPopupMenu: TPopupMenu;
-		POnOff: TMenuItem;
-		PAbout: TMenuItem;
-		PExit: TMenuItem;
 		tmrMouseLeave: TTimer;
 		tmrTargetWndActivate: TTimer;
 		procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer;
@@ -23,24 +22,21 @@ type
 		procedure FormCreate(Sender: TObject);
 		procedure FormDestroy(Sender: TObject);
 		procedure FormResize(Sender: TObject);
+		procedure lsbCommandsClick(Sender: TObject);
+		procedure lsbCommandsContextPopup(Sender: TObject; MousePos: TPoint;
+			var Handled: Boolean);
 		procedure lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 			Rect: TRect; State: TOwnerDrawState);
 		procedure lsbCommandsExit(Sender: TObject);
 		procedure lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 			var Height: Integer);
-		procedure lsbCommandsMouseDown(Sender: TObject; Button: TMouseButton;
-			Shift: TShiftState; X, Y: Integer);
 		procedure lsbCommandsMouseMove(Sender: TObject; Shift: TShiftState;
 			X, Y: Integer);
-		procedure lsbCommandsMouseUp(Sender: TObject; Button: TMouseButton;
-			Shift: TShiftState; X, Y: Integer);
-		procedure POnOffClick(Sender: TObject);
-		procedure PAboutClick(Sender: TObject);
-		procedure PExitClick(Sender: TObject);
+		procedure MFileExitClick(Sender: TObject);
+		procedure MHelpAboutClick(Sender: TObject);
 		procedure tmrMouseLeaveTimer(Sender: TObject);
 		procedure tmrTargetWndActivateTimer(Sender: TObject);
 	private
-		FAppPath: string;
 		procedure WMEnterSizeMove(var Msg: TMessage); message WM_ENTERSIZEMOVE;
 		procedure WMExitSizeMove(var Msg: TMessage); message WM_EXITSIZEMOVE;
 		procedure WMHotkey(var Msg: TWMHotkey); message WM_HOTKEY;
@@ -52,7 +48,6 @@ type
 		procedure SaveToIni;
 		procedure SendCommand(const Number: Byte; const IsTeamChat: Boolean);
 		procedure Shrink;
-		property AppPath: string read FAppPath;
 	end;
 
 var
@@ -70,14 +65,12 @@ var
 	IsTeamHotkey: Boolean;
 	TargetWndName: string;
 	WndPos, HKPos: string;
-	IsAppWork: Boolean;
 
 implementation
 
 uses uAbout, uCommandList;
 
 {$R *.dfm}
-{$R WindowsXP.res}
 
 procedure TMainForm.FormCanResize(Sender: TObject;
 	var NewWidth, NewHeight: Integer; var Resize: Boolean);
@@ -85,8 +78,8 @@ begin
 	if not IsChangeForm then begin
 		if IsHidden then NewWidth := Width else begin
 			WidthMax := NewWidth;
-			if WndPos = 'Left' then Left := 0;
-			if WndPos = 'Right' then Left := Screen.Width - WidthMax;
+			if WndPos = 'Left' then Left := 0 else
+				if WndPos = 'Right' then Left := Screen.Width - WidthMax;
 		end;
 		NewHeight := Height;
 		Resize := True;
@@ -101,10 +94,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-	FAppPath := GetCurrentDir;
-	if IsAppWork then POnOff.Caption := 'Выключить'
-	else POnOff.Caption := 'Включить';
-	Commands := TCommandList.Create(AppPath + '\command.lst');
+	Commands := TCommandList.Create(Handle, GetCurrentDir + '\command.lst');
 	LoadFromIni;
 	LoadCommands;
 	Restore(True);
@@ -120,6 +110,23 @@ begin
 	lsbCommands.Repaint;
 end;
 
+procedure TMainForm.lsbCommandsClick(Sender: TObject);
+begin
+	with lsbCommands do if Items[ItemIndex] > '' then begin
+		SendCommand(ItemIndex, True);
+		if not IsHidden then Shrink;
+	end;
+end;
+
+procedure TMainForm.lsbCommandsContextPopup(Sender: TObject;
+	MousePos: TPoint; var Handled: Boolean);
+begin
+	with lsbCommands do begin
+		if Items[ItemIndex] > '' then SendCommand(ItemIndex, False);
+		if not IsHidden then Shrink;
+	end;
+end;
+
 procedure TMainForm.lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 	Rect: TRect; State: TOwnerDrawState);
 var
@@ -129,19 +136,20 @@ begin
 		Brush.Color := clSeparator;
 		FillRect(Rect);
 	end else begin
-		if Index = lsbCommands.ItemIndex then Brush.Color := clSelected else Brush.Color := clList;
+		if Index = lsbCommands.ItemIndex then Brush.Color := clSelected
+		else Brush.Color := clList;
+		FillRect(Rect);
 		Font.Height := FontSz;
 		Font.Color := clText;
-		FillRect(Rect);
-		TextOut(Rect.Left + 2, Rect.Top, Commands.List[Index].Text);
+		TextOut(Rect.Left + 2, Rect.Top, Commands[Index].Text);
 		Font.Height := HKFontSz;
-		if Commands.List[Index].hkTeam.IsRegister then Font.Color := clHKTeam else Font.Color := clRed;
-		hkWidth := TextWidth(Commands.List[Index].hkTeam.AsString);
-		if HKPos = 'Down' then TextOut(Rect.Left + 2, Rect.Bottom - HKFontSz, Commands.List[Index].hkTeam.AsString)
-		else TextOut(Rect.Right - hkWidth - 2, Rect.Top, Commands.List[Index].hkTeam.AsString);
-		if Commands.List[Index].hkGlobal.IsRegister then Font.Color := clHKGlobal else Font.Color := clRed;
-		hkWidth := TextWidth(Commands.List[Index].hkGlobal.AsString);
-		TextOut(Rect.Right - hkWidth - 2, Rect.Bottom - HKFontSz, Commands.List[Index].hkGlobal.AsString);
+		if Commands[Index].hkTeam.IsRegister then Font.Color := clHKTeam else Font.Color := clRed;
+		hkWidth := TextWidth(Commands[Index].hkTeam.AsString);
+		if HKPos = 'Down' then TextOut(Rect.Left + 2, Rect.Bottom - HKFontSz, Commands[Index].hkTeam.AsString)
+		else TextOut(Rect.Right - hkWidth - 2, Rect.Top, Commands[Index].hkTeam.AsString);
+		if Commands[Index].hkGlobal.IsRegister then Font.Color := clHKGlobal else Font.Color := clRed;
+		hkWidth := TextWidth(Commands[Index].hkGlobal.AsString);
+		TextOut(Rect.Right - hkWidth - 2, Rect.Bottom - HKFontSz, Commands[Index].hkGlobal.AsString);
 		Brush.Color := clWhite;
 		Font.Color := clBlack;
 	end;
@@ -156,17 +164,9 @@ procedure TMainForm.lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 	var Height: Integer);
 begin
 	if lsbCommands.Items[Index] = '' then Height := 2 else
-		if (Pos(#9, lsbCommands.Items[Index]) > 0) and (HKPos = 'Down')
+		if {(Pos(#9, lsbCommands.Items[Index]) > 0) and} (HKPos = 'Down')
+			and (Commands[Index].hkTeam.Atom + Commands[Index].hkGlobal.Atom > 0)
 		then Height := FontSz + HKFontSz else Height := FontSz;
-end;
-
-procedure TMainForm.lsbCommandsMouseDown(Sender: TObject; Button: TMouseButton;
-	Shift: TShiftState; X, Y: Integer);
-var
-	ItemNum: Integer;
-begin
-	ItemNum := lsbCommands.ItemAtPos(Point(X, Y), True);
-	if lsbCommands.Items[ItemNum] > '' then SendCommand(ItemNum, Button = mbLeft);
 end;
 
 procedure TMainForm.lsbCommandsMouseMove(Sender: TObject; Shift: TShiftState;
@@ -183,36 +183,14 @@ begin
 	tmrMouseLeave.Enabled := True;
 end;
 
-procedure TMainForm.lsbCommandsMouseUp(Sender: TObject; Button: TMouseButton;
-	Shift: TShiftState; X, Y: Integer);
-begin
-	if (lsbCommands.Items[lsbCommands.ItemIndex] > '') and not IsHidden then Shrink;
-end;
-
-procedure TMainForm.POnOffClick(Sender: TObject);
-begin
-	if IsAppWork then begin
-		ctiTrayIcon.IconIndex := 0;
-		ctiTrayIcon.HideMainForm;
-		Commands.UnregHK;
-		POnOff.Caption := 'Включить';
-	end else begin
-		ctiTrayIcon.IconIndex := 1;
-		Commands.RegHK;
-		ctiTrayIcon.ShowMainForm;
-		POnOff.Caption := 'Выключить';
-	end;
-	IsAppWork := not IsAppWork;
-end;
-
-procedure TMainForm.PAboutClick(Sender: TObject);
-begin
-	AboutBox.ShowModal;
-end;
-
-procedure TMainForm.PExitClick(Sender: TObject);
+procedure TMainForm.MFileExitClick(Sender: TObject);
 begin
 	Close;
+end;
+
+procedure TMainForm.MHelpAboutClick(Sender: TObject);
+begin
+	AboutBox.ShowModal;
 end;
 
 procedure TMainForm.tmrMouseLeaveTimer(Sender: TObject);
@@ -228,7 +206,7 @@ var
 begin
 	H := GetForegroundWindow;
 	if H <> Handle then hActiveWnd := H;
-	if (Tag >= 0) and (Commands.List[Tag].Text > '')
+	if (Tag >= 0) and (Commands[Tag].Text > '')
 		and (GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0)
 	then begin
 		SendCommand(Tag, IsTeamHotkey);
@@ -242,10 +220,12 @@ end;
 procedure TMainForm.WMEnterSizeMove(var Msg: TMessage);
 begin
 	tmrMouseLeave.Enabled := False;
+	inherited;
 end;
 
 procedure TMainForm.WMExitSizeMove(var Msg: TMessage);
 begin
+	inherited;
 	tmrMouseLeave.Enabled := True;
 end;
 
@@ -254,19 +234,19 @@ var
 	I: Byte;
 begin
 	inherited;
-	tmrTargetWndActivate.Interval := 100;
 	for I := 0 to Commands.Count - 1 do begin
-		if Msg.HotKey = Commands.List[I].hkTeam.Atom then begin
+		if Msg.HotKey = Commands[I].hkTeam.Atom then begin
 			Tag := I;
 			IsTeamHotkey := True;
 			Break;
 		end;
-		if Msg.HotKey = Commands.List[I].hkGlobal.Atom then begin
+		if Msg.HotKey = Commands[I].hkGlobal.Atom then begin
 			Tag := I;
 			IsTeamHotkey := False;
 			Break;
 		end;
 	end;
+	tmrTargetWndActivate.Interval := 100;
 end;
 
 procedure TMainForm.WMMove(var Msg: TWMMove);
@@ -292,15 +272,14 @@ var
 	I: Word;
 begin
 	for I := 0 to Commands.Count - 1 do
-		lsbCommands.Items.Add(Commands.List[I].Text);
-	ClientHeight := lsbCommands.ItemRect(Commands.Count - 1).Bottom + 4;
+		lsbCommands.Items.Add(Commands[I].Text);
+	ClientHeight := lsbCommands.ItemRect(Commands.Count - 1).Bottom;
 	if Height > Screen.Height then Height := Screen.Height;
-	ctiTrayIcon.IconIndex := 1;
 end;
 
 procedure TMainForm.LoadFromIni;
 begin
-	with TIniFile.Create(AppPath + '\config.cfg') do try
+	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
 		Left := ReadInteger('Settings', 'Left', Left);
 		Top := ReadInteger('Settings', 'Top', Top);
 		WidthMin := ReadInteger('Settings', 'WidthMin', 35);
@@ -328,7 +307,6 @@ end;
 
 procedure TMainForm.Restore(const Forced: Boolean);
 begin
-	tmrMouseLeave.Enabled := True;
 	if IsHidden or Forced then begin
 		IsChangeForm := True;
 		if WndPos = 'Left' then Left := 0 else
@@ -338,21 +316,17 @@ begin
 		IsChangeForm := False;
 	end;
 	IsHidden := False;
+	tmrMouseLeave.Enabled := True;
 end;
 
 procedure TMainForm.SaveToIni;
 begin
-	with TIniFile.Create(AppPath + '\config.cfg') do try
-		if Left <> ReadInteger('Settings', 'Left', 0) then
-			WriteInteger('Settings', 'Left', Left);
-		if Top <> ReadInteger('Settings', 'Top', 0) then
-			WriteInteger('Settings', 'Top', Top);
-		if WidthMin <> ReadInteger('Settings', 'WidthMin', 0) then
-			WriteInteger('Settings', 'WidthMin', WidthMin);
-		if WidthMax <> ReadInteger('Settings', 'WidthMax', 0) then
-			WriteInteger('Settings', 'WidthMax', WidthMax);
-		if WndPos <> ReadString('Settings', 'WindowPosition', '') then
-			WriteString('Settings', 'WindowPosition', WndPos);
+	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
+		WriteInteger('Settings', 'Left', Left);
+		WriteInteger('Settings', 'Top', Top);
+		WriteInteger('Settings', 'WidthMin', WidthMin);
+		WriteInteger('Settings', 'WidthMax', WidthMax);
+		WriteString('Settings', 'WindowPosition', WndPos);
 	finally
 		Free;
 	end;
@@ -372,7 +346,7 @@ var
 begin
 	CurrKbdLayout := GetKeyboardLayout(0);
 	ActivateKeyboardLayout($0419, KLF_ACTIVATE);
-	Clipboard.AsText := Commands.List[Number].Text;
+	Clipboard.AsText := Commands[Number].Text;
 	ActivateKeyboardLayout(CurrKbdLayout, KLF_ACTIVATE);
 	if TargetWndName > '' then
 		IsWindowFound := hActiveWnd = FindWindow(nil, @TargetWndName)
@@ -407,6 +381,5 @@ initialization
 
 	IsHidden := True;
 	IsChangeForm := True;
-	IsAppWork := True;
 
 end.

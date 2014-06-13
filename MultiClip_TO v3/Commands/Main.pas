@@ -4,7 +4,7 @@ interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons, XPMan, Menus;
+	Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons, Menus;
 
 type
 	TfrmCommands = class(TForm)
@@ -22,17 +22,12 @@ type
 		btnDelete: TButton;
 		bbnOK: TBitBtn;
 		bbnCancel: TBitBtn;
-		XPM: TXPManifest;
 		procedure FormCreate(Sender: TObject);
 		procedure bbnOKClick(Sender: TObject);
 		procedure bbnCancelClick(Sender: TObject);
 		procedure btnAddCommandClick(Sender: TObject);
 		procedure btnSeparatorClick(Sender: TObject);
 		procedure btnDeleteClick(Sender: TObject);
-	private
-		FAppPath: string;
-	public
-		property AppPath: string read FAppPath write FAppPath;
 	end;
 
 var
@@ -41,12 +36,12 @@ var
 implementation
 
 {$R *.dfm}
+{$R WindowsXP.res}
 
 procedure TfrmCommands.FormCreate(Sender: TObject);
 begin
-	AppPath := ExtractFilePath(Application.ExeName);
-	if FileExists(AppPath + 'command.lst') then
-		mmoEditor.Lines.LoadFromFile(AppPath + 'command.lst')
+	if FileExists(GetCurrentDir + '\command.lst') then
+		mmoEditor.Lines.LoadFromFile(GetCurrentDir + '\command.lst')
 	else begin
 		MessageBox(Handle, 'Файл списка команд command.lst не найден.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING);
 		Application.Terminate;
@@ -55,7 +50,7 @@ end;
 
 procedure TfrmCommands.bbnOKClick(Sender: TObject);
 begin
-	mmoEditor.Lines.SaveToFile(AppPath + 'command.lst');
+	mmoEditor.Lines.SaveToFile(GetCurrentDir + '\command.lst');
 	Close;
 end;
 
@@ -68,13 +63,13 @@ procedure TfrmCommands.btnAddCommandClick(Sender: TObject);
 var
 	Buffer: string;
 begin
-	Buffer := '';
 	if lbeText.Text = '' then begin
 		MessageBox(Handle, 'Добавление пустой команды не имеет смысла.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING);
 		Exit;
 	end else begin
-		if chbDelay.Checked then Buffer := '%';
+		if chbDelay.Checked then Buffer := '%' else Buffer := '';
 		Buffer := Buffer + lbeText.Text + #9 + ShortCutToText(htkTeam.HotKey) + #9 + ShortCutToText(htkGlobal.HotKey);
+		while Buffer[Length(Buffer)] = #9 do Delete(Buffer, Length(Buffer), 1);
 		mmoEditor.Lines.Insert(mmoEditor.CaretPos.Y, Buffer);
 	end;
 	chbDelay.Checked := False;

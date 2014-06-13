@@ -2,13 +2,11 @@ unit uCommandList;
 
 interface
 
-uses Windows;
-
 type
 	THotKey = record
-		Atom: Integer;
+		Atom: Word;
 		IsRegister: Boolean;
-		Shortcut: Cardinal;
+		Shortcut: Word;
 		Modifiers: Cardinal;
 		VirtualCode: Byte;
 		AsString: string;
@@ -25,15 +23,17 @@ type
 	private
 		FCount: Word;
 		FList: array of TCommand;
+		FOwnerID: Cardinal;
 		function GetItem(Index: Word): TCommand;
 	public
-		constructor Create(const AFilename: string);
+		constructor Create(AOwnerID: Cardinal; AFilename: string);
 		destructor Destroy; override;
 		procedure LoadFromFile(const AFilename: string);
 		procedure RegHK;
 		procedure UnregHK;
 		property Count: Word read FCount;
-		property List[index: Word]: TCommand read GetItem;
+		property OwnerID: Cardinal read FOwnerID;
+		property List[Index: Word]: TCommand read GetItem; default;
 	end;
 
 var
@@ -41,14 +41,15 @@ var
 
 implementation
 
-uses SysUtils, Menus, uMain, Dialogs;
+uses Windows, SysUtils, Menus;
 
 { TCommandList }
 
-constructor TCommandList.Create(const AFilename: string);
+constructor TCommandList.Create(AOwnerID: Cardinal; AFilename: string);
 begin
 	FCount := 0;
-	SetLength(FList, FCount);
+	FOwnerID := AOwnerID;
+	SetLength(FList, Count);
 	LoadFromFile(AFilename);
 	RegHK;
 end;
@@ -59,22 +60,17 @@ var
 begin
 	UnregHK;
 	for I := 0 to Count - 1 do begin
-		if List[I].hkTeam.Atom > 0 then GlobalDeleteAtom(List[I].hkTeam.Atom);
-		if List[I].hkGlobal.Atom > 0 then GlobalDeleteAtom(List[I].hkGlobal.Atom);
+		if Self[I].hkTeam.Atom > 0 then GlobalDeleteAtom(Self[I].hkTeam.Atom);
+		if Self[I].hkGlobal.Atom > 0 then GlobalDeleteAtom(Self[I].hkGlobal.Atom);
 	end;
 	FCount := 0;
-	SetLength(FList, FCount);
+	SetLength(FList, Count);
 	inherited;
 end;
 
 function TCommandList.GetItem(Index: Word): TCommand;
 begin
-	with Result do begin
-		IsDelay := FList[Index].IsDelay;
-		Text := FList[Index].Text;
-		hkTeam := FList[Index].hkTeam;
-		hkGlobal := FList[Index].hkGlobal;
-	end;
+	Result := FList[Index];
 end;
 
 procedure TCommandList.LoadFromFile(const AFilename: string);
@@ -95,7 +91,7 @@ begin
 		while not Eof(CmdList) do begin
 			ReadLn(CmdList, Buffer);
 			Inc(FCount);
-			SetLength(FList, FCount);
+			SetLength(FList, Count);
 			with FList[Count - 1] do begin
 				hkTeam.Atom := 0;
 				hkTeam.IsRegister := False;
@@ -128,7 +124,7 @@ begin
 					with hkGlobal do begin
 						Shortcut := TextToShortCut(AsString);
 						if Shortcut > 0 then begin
-							Atom := GlobalAddAtom(PChar('T' + IntToStr(Count - 1)));
+							Atom := GlobalAddAtom(PChar('G' + IntToStr(Count - 1)));
 							Modifiers := 0;
 							if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
 							if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
@@ -147,11 +143,11 @@ procedure TCommandList.RegHK;
 var
 	I: Word;
 begin
-	for I := 0 to Count - 1 do begin
-		if List[I].hkTeam.Atom > 0 then FList[I].hkTeam.IsRegister :=
-			RegisterHotKey(MainForm.Handle, List[I].hkTeam.Atom, List[I].hkTeam.Modifiers, List[I].hkTeam.VirtualCode);
-		if List[I].hkGlobal.Atom > 0 then FList[I].hkGlobal.IsRegister :=
-			RegisterHotKey(MainForm.Handle, List[I].hkGlobal.Atom, List[I].hkGlobal.Modifiers, List[I].hkGlobal.VirtualCode);
+	for I := 0 to Count - 1 do with FList[I] do begin
+		if hkTeam.Atom > 0 then hkTeam.IsRegister :=
+			RegisterHotKey(OwnerID, hkTeam.Atom, hkTeam.Modifiers, hkTeam.VirtualCode);
+		if hkGlobal.Atom > 0 then hkGlobal.IsRegister :=
+			RegisterHotKey(OwnerID, hkGlobal.Atom, hkGlobal.Modifiers, hkGlobal.VirtualCode);
 	end;
 end;
 
@@ -159,11 +155,11 @@ procedure TCommandList.UnregHK;
 var
 	I: Word;
 begin
-	for I := 0 to Count - 1 do begin
-		if (List[I].hkTeam.Atom > 0) and FList[I].hkTeam.IsRegister then
-			UnregisterHotkey(MainForm.Handle, List[I].hkTeam.Atom);
-		if (List[I].hkGlobal.Atom > 0) and FList[I].hkGlobal.IsRegister then
-			UnregisterHotkey(MainForm.Handle, List[I].hkGlobal.Atom);
+	for I := 0 to Count - 1 do with FList[I] do begin
+		if (hkTeam.Atom > 0) and hkTeam.IsRegister then
+			UnregisterHotkey(OwnerID, hkTeam.Atom);
+		if (hkGlobal.Atom > 0) and hkGlobal.IsRegister then
+			UnregisterHotkey(OwnerID, hkGlobal.Atom);
 	end;
 end;
 
