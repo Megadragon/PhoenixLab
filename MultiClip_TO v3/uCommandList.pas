@@ -21,19 +21,19 @@ type
 
 	TCommandList = class
 	private
-		FCount: Word;
+		FCount: Byte;
 		FList: array of TCommand;
 		FOwnerID: Cardinal;
-		function GetItem(Index: Word): TCommand;
+		function GetItem(Index: Byte): TCommand;
 	public
 		constructor Create(AOwnerID: Cardinal; AFilename: string);
 		destructor Destroy; override;
 		procedure LoadFromFile(const AFilename: string);
 		procedure RegHK;
 		procedure UnregHK;
-		property Count: Word read FCount;
+		property Count: Byte read FCount;
 		property OwnerID: Cardinal read FOwnerID;
-		property List[Index: Word]: TCommand read GetItem; default;
+		property List[Index: Byte]: TCommand read GetItem; default;
 	end;
 
 var
@@ -65,10 +65,9 @@ begin
 	end;
 	FCount := 0;
 	SetLength(FList, Count);
-	inherited;
 end;
 
-function TCommandList.GetItem(Index: Word): TCommand;
+function TCommandList.GetItem(Index: Byte): TCommand;
 begin
 	Result := FList[Index];
 end;
@@ -83,7 +82,7 @@ const
 var
 	CmdList: TextFile;
 	Buffer: string;
-	TabPos: Word;
+	TabPos: Byte;
 begin
 	if FileExists(AFilename) then begin
 		AssignFile(CmdList, AFilename);
@@ -141,7 +140,7 @@ end;
 
 procedure TCommandList.RegHK;
 var
-	I: Word;
+	I: Byte;
 begin
 	for I := 0 to Count - 1 do with FList[I] do begin
 		if hkTeam.Atom > 0 then hkTeam.IsRegister :=
@@ -153,7 +152,7 @@ end;
 
 procedure TCommandList.UnregHK;
 var
-	I: Word;
+	I: Byte;
 begin
 	for I := 0 to Count - 1 do with FList[I] do begin
 		if (hkTeam.Atom > 0) and hkTeam.IsRegister then

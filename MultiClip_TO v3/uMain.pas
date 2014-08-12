@@ -4,18 +4,18 @@ interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, StdCtrls, IniFiles, Menus, ExtCtrls, Clipbrd, ImgList;
+	Dialogs, StdCtrls, ExtCtrls, ToolWin, ActnMan, ActnCtrls, ActnMenus, ActnList,
+	StdActns, XPStyleActnCtrls;
 
 type
 	TMainForm = class(TForm)
-		mmuMenuBar: TMainMenu;
-		MenuFile: TMenuItem;
-		MFileExit: TMenuItem;
-		MenuHelp: TMenuItem;
-		MHelpAbout: TMenuItem;
 		lsbCommands: TListBox;
 		tmrMouseLeave: TTimer;
 		tmrTargetWndActivate: TTimer;
+		acmActions: TActionManager;
+		afeExit: TFileExit;
+		acnAbout: TAction;
+		ammMenuBar: TActionMainMenuBar;
 		procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer;
 			var Resize: Boolean);
 		procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -32,8 +32,7 @@ type
 			var Height: Integer);
 		procedure lsbCommandsMouseMove(Sender: TObject; Shift: TShiftState;
 			X, Y: Integer);
-		procedure MFileExitClick(Sender: TObject);
-		procedure MHelpAboutClick(Sender: TObject);
+		procedure acnAboutExecute(Sender: TObject);
 		procedure tmrMouseLeaveTimer(Sender: TObject);
 		procedure tmrTargetWndActivateTimer(Sender: TObject);
 	private
@@ -41,6 +40,7 @@ type
 		procedure WMExitSizeMove(var Msg: TMessage); message WM_EXITSIZEMOVE;
 		procedure WMHotkey(var Msg: TWMHotkey); message WM_HOTKEY;
 		procedure WMMove(var Msg: TWMMove); message WM_MOVE;
+		procedure WMMoving(var Msg: TWMMoving); message WM_MOVING;
 	public
 		procedure LoadCommands;
 		procedure LoadFromIni;
@@ -68,7 +68,7 @@ var
 
 implementation
 
-uses uAbout, uCommandList;
+uses Clipbrd, IniFiles, uAbout, uCommandList;
 
 {$R *.dfm}
 
@@ -82,14 +82,12 @@ begin
 				if WndPos = 'Right' then Left := Screen.Width - WidthMax;
 		end;
 		NewHeight := Height;
-		Resize := True;
 	end;
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 	SaveToIni;
-	CanClose := True;
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -121,8 +119,8 @@ end;
 procedure TMainForm.lsbCommandsContextPopup(Sender: TObject;
 	MousePos: TPoint; var Handled: Boolean);
 begin
-	with lsbCommands do begin
-		if Items[ItemIndex] > '' then SendCommand(ItemIndex, False);
+	with lsbCommands do if Items[ItemIndex] > '' then begin
+		SendCommand(ItemIndex, False);
 		if not IsHidden then Shrink;
 	end;
 end;
@@ -164,8 +162,7 @@ procedure TMainForm.lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 	var Height: Integer);
 begin
 	if lsbCommands.Items[Index] = '' then Height := 2 else
-		if {(Pos(#9, lsbCommands.Items[Index]) > 0) and} (HKPos = 'Down')
-			and (Commands[Index].hkTeam.Atom + Commands[Index].hkGlobal.Atom > 0)
+		if (HKPos = 'Down') and (Commands[Index].hkTeam.Atom or Commands[Index].hkGlobal.Atom <> 0)
 		then Height := FontSz + HKFontSz else Height := FontSz;
 end;
 
@@ -183,21 +180,14 @@ begin
 	tmrMouseLeave.Enabled := True;
 end;
 
-procedure TMainForm.MFileExitClick(Sender: TObject);
-begin
-	Close;
-end;
-
-procedure TMainForm.MHelpAboutClick(Sender: TObject);
+procedure TMainForm.acnAboutExecute(Sender: TObject);
 begin
 	AboutBox.ShowModal;
 end;
 
 procedure TMainForm.tmrMouseLeaveTimer(Sender: TObject);
 begin
-	if (Mouse.CursorPos.X < Left) or (Mouse.CursorPos.Y < Top)
-		or (Mouse.CursorPos.X > Left + Width) or (Mouse.CursorPos.Y > Top + Height)
-	then Shrink;
+	if not PtInRect(BoundsRect, Mouse.CursorPos) then Shrink;
 end;
 
 procedure TMainForm.tmrTargetWndActivateTimer(Sender: TObject);
@@ -220,12 +210,10 @@ end;
 procedure TMainForm.WMEnterSizeMove(var Msg: TMessage);
 begin
 	tmrMouseLeave.Enabled := False;
-	inherited;
 end;
 
 procedure TMainForm.WMExitSizeMove(var Msg: TMessage);
 begin
-	inherited;
 	tmrMouseLeave.Enabled := True;
 end;
 
@@ -233,7 +221,6 @@ procedure TMainForm.WMHotKey(var Msg: TWMHotKey);
 var
 	I: Byte;
 begin
-	inherited;
 	for I := 0 to Commands.Count - 1 do begin
 		if Msg.HotKey = Commands[I].hkTeam.Atom then begin
 			Tag := I;
@@ -253,27 +240,34 @@ procedure TMainForm.WMMove(var Msg: TWMMove);
 begin
 	if not IsChangeForm then begin
 		IsChangeForm := True;
-		if Left + Width > Screen.Width then Left := Screen.Width - Width;
-		if Left < 0 then Left := 0;
-		if Top + Height > Screen.Height then Top := Screen.Height - Height;
-		if Top < 0 then Top := 0;
 		if Left = 0 then WndPos := 'Left' else
 			if Left + Width = Screen.Width then WndPos := 'Right' else
 				WndPos := 'Manual';
-		Repaint;
 		IsChangeForm := False;
 	end;
+end;
+
+procedure TMainForm.WMMoving(var Msg: TWMMoving);
+begin
+	if Msg.DragRect^.Left < Screen.WorkAreaLeft then
+		OffsetRect(Msg.DragRect^, Screen.WorkAreaLeft - Msg.DragRect^.Left, 0);
+	if Msg.DragRect^.Top < Screen.WorkAreaTop then
+		OffsetRect(Msg.DragRect^, 0, Screen.WorkAreaTop - Msg.DragRect^.Top);
+	if Msg.DragRect^.Right > Screen.WorkAreaRect.Right then
+		OffsetRect(Msg.DragRect^, Screen.WorkAreaRect.Right - Msg.DragRect^.Right, 0);
+	if Msg.DragRect^.Bottom > Screen.WorkAreaRect.Bottom then
+		OffsetRect(Msg.DragRect^, 0, Screen.WorkAreaRect.Bottom - Msg.DragRect^.Bottom);
 end;
 
 { Secondary procedures }
 
 procedure TMainForm.LoadCommands;
 var
-	I: Word;
+	I: Byte;
 begin
 	for I := 0 to Commands.Count - 1 do
 		lsbCommands.Items.Add(Commands[I].Text);
-	ClientHeight := lsbCommands.ItemRect(Commands.Count - 1).Bottom;
+	ClientHeight := ammMenuBar.Height + lsbCommands.ItemRect(lsbCommands.Count - 1).Bottom;
 	if Height > Screen.Height then Height := Screen.Height;
 end;
 
@@ -312,6 +306,7 @@ begin
 		if WndPos = 'Left' then Left := 0 else
 			if WndPos = 'Right' then Left := Screen.Width - WidthMax;
 		if WndPos <> 'Manual' then Width := WidthMax;
+		ammMenuBar.Height := ClientHeight - lsbCommands.Height;
 		AlphaBlend := False;
 		IsChangeForm := False;
 	end;
