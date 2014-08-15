@@ -6,7 +6,6 @@ type
 	THotKey = record
 		Atom: Word;
 		IsRegister: Boolean;
-		Shortcut: Word;
 		Modifiers: Cardinal;
 		VirtualCode: Byte;
 		AsString: string;
@@ -24,6 +23,7 @@ type
 		FCount: Byte;
 		FList: array of TCommand;
 		FOwnerID: Cardinal;
+		procedure FillHKByID(var AHotKey: THotKey; const ID: string);
 		function GetItem(Index: Byte): TCommand;
 	public
 		constructor Create(AOwnerID: Cardinal; AFilename: string);
@@ -49,14 +49,13 @@ constructor TCommandList.Create(AOwnerID: Cardinal; AFilename: string);
 begin
 	FCount := 0;
 	FOwnerID := AOwnerID;
-	SetLength(FList, Count);
 	LoadFromFile(AFilename);
 	RegHK;
 end;
 
 destructor TCommandList.Destroy;
 var
-	I: Word;
+	I: Byte;
 begin
 	UnregHK;
 	for I := 0 to Count - 1 do begin
@@ -67,18 +66,35 @@ begin
 	SetLength(FList, Count);
 end;
 
-function TCommandList.GetItem(Index: Byte): TCommand;
-begin
-	Result := FList[Index];
-end;
-
-procedure TCommandList.LoadFromFile(const AFilename: string);
+procedure TCommandList.FillHKByID(var AHotKey: THotKey; const ID: string);
 const
 	// from unit Classes
 	scNone = 0;
 	scShift = $2000;
 	scCtrl = $4000;
 	scAlt = $8000;
+var
+	Shortcut: Word;
+begin
+	with AHotKey do begin
+		Shortcut := TextToShortCut(AsString);
+		if Shortcut > 0 then begin
+			Atom := GlobalAddAtom(PChar(ID));
+			Modifiers := 0;
+			if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
+			if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
+			if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
+			VirtualCode := Shortcut;
+		end else AsString := '';
+	end;
+end;
+
+function TCommandList.GetItem(Index: Byte): TCommand;
+begin
+	Result := FList[Index];
+end;
+
+procedure TCommandList.LoadFromFile(const AFilename: string);
 var
 	CmdList: TextFile;
 	Buffer: string;
@@ -109,28 +125,8 @@ begin
 						Delete(Buffer, 1, TabPos);
 						hkGlobal.AsString := Buffer;
 					end else hkTeam.AsString := Buffer;
-					with hkTeam do begin
-						Shortcut := TextToShortCut(AsString);
-						if Shortcut > 0 then begin
-							Atom := GlobalAddAtom(PChar('T' + IntToStr(Count - 1)));
-							Modifiers := 0;
-							if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
-							if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
-							if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
-							VirtualCode := Shortcut;
-						end;
-					end;
-					with hkGlobal do begin
-						Shortcut := TextToShortCut(AsString);
-						if Shortcut > 0 then begin
-							Atom := GlobalAddAtom(PChar('G' + IntToStr(Count - 1)));
-							Modifiers := 0;
-							if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
-							if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
-							if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
-							VirtualCode := Shortcut;
-						end;
-					end;
+					FillHKByID(hkTeam, 'Team_Chat_' + IntToStr(Count - 1));
+					FillHKByID(hkGlobal, 'Global_Chat_' + IntToStr(Count - 1));
 				end else Text := Buffer;
 			end;
 		end;
@@ -142,10 +138,10 @@ procedure TCommandList.RegHK;
 var
 	I: Byte;
 begin
-	for I := 0 to Count - 1 do with FList[I] do begin
-		if hkTeam.Atom > 0 then hkTeam.IsRegister :=
+	for I := 0 to Count - 1 do with Self[I] do begin
+		if hkTeam.Atom > 0 then FList[I].hkTeam.IsRegister :=
 			RegisterHotKey(OwnerID, hkTeam.Atom, hkTeam.Modifiers, hkTeam.VirtualCode);
-		if hkGlobal.Atom > 0 then hkGlobal.IsRegister :=
+		if hkGlobal.Atom > 0 then FList[I].hkGlobal.IsRegister :=
 			RegisterHotKey(OwnerID, hkGlobal.Atom, hkGlobal.Modifiers, hkGlobal.VirtualCode);
 	end;
 end;
@@ -154,7 +150,7 @@ procedure TCommandList.UnregHK;
 var
 	I: Byte;
 begin
-	for I := 0 to Count - 1 do with FList[I] do begin
+	for I := 0 to Count - 1 do with Self[I] do begin
 		if (hkTeam.Atom > 0) and hkTeam.IsRegister then
 			UnregisterHotkey(OwnerID, hkTeam.Atom);
 		if (hkGlobal.Atom > 0) and hkGlobal.IsRegister then

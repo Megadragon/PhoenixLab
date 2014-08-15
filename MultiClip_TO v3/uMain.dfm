@@ -4,11 +4,9 @@ object MainForm: TMainForm
   Top = 322
   Width = 212
   Height = 513
-  HorzScrollBar.Visible = False
   AlphaBlend = True
   AlphaBlendValue = 160
-  BorderIcons = [biSystemMenu]
-  BorderStyle = bsSizeToolWin
+  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Multiclip'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -66,9 +64,9 @@ object MainForm: TMainForm
   object lsbCommands: TListBox
     Tag = -1
     Left = 0
-    Top = 26
+    Top = 0
     Width = 196
-    Height = 449
+    Height = 475
     Style = lbOwnerDrawVariable
     Align = alClient
     BorderStyle = bsNone
@@ -83,27 +81,8 @@ object MainForm: TMainForm
     OnClick = lsbCommandsClick
     OnContextPopup = lsbCommandsContextPopup
     OnDrawItem = lsbCommandsDrawItem
-    OnExit = lsbCommandsExit
     OnMeasureItem = lsbCommandsMeasureItem
     OnMouseMove = lsbCommandsMouseMove
-  end
-  object ammMenuBar: TActionMainMenuBar
-    Left = 0
-    Top = 0
-    Width = 196
-    Height = 26
-    UseSystemFont = False
-    ActionManager = acmActions
-    Caption = #1057#1090#1088#1086#1082#1072' '#1084#1077#1085#1102
-    ColorMap.HighlightColor = clWhite
-    ColorMap.BtnSelectedColor = clBtnFace
-    ColorMap.UnusedColor = clWhite
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Segoe UI'
-    Font.Style = []
-    Spacing = 0
   end
   object tmrMouseLeave: TTimer
     Enabled = False
@@ -118,42 +97,28 @@ object MainForm: TMainForm
     Left = 48
     Top = 264
   end
-  object acmActions: TActionManager
-    ActionBars = <
-      item
-        Items = <
-          item
-            Items = <
-              item
-                Action = afeExit
-                ImageIndex = 43
-                ShortCut = 16465
-              end>
-            Caption = '&'#1060#1072#1081#1083
-          end
-          item
-            Items = <
-              item
-                Action = acnAbout
-              end>
-            Caption = '&'#1057#1087#1088#1072#1074#1082#1072
-          end>
-        ActionBar = ammMenuBar
-      end>
+  object acnActions: TActionList
     Left = 48
-    Top = 88
-    StyleName = 'XP Style'
-    object afeExit: TFileExit
-      Category = '&'#1060#1072#1081#1083
+    Top = 128
+    object acnExit: TFileExit
+      Category = 'File'
       Caption = '&'#1042#1099#1093#1086#1076
-      Hint = #1042#1099#1093#1086#1076'|'#1042#1099#1093#1086#1076' '#1080#1079' '#1087#1088#1086#1075#1088#1072#1084#1084#1099
+      Hint = #1042#1099#1093#1086#1076'|'#1042#1099#1081#1090#1080' '#1080#1079' '#1087#1088#1080#1083#1086#1078#1077#1085#1080#1103
       ImageIndex = 43
       ShortCut = 16465
     end
     object acnAbout: TAction
-      Category = '&'#1057#1087#1088#1072#1074#1082#1072
-      Caption = '&'#1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077'...'
+      Category = 'Help'
+      Caption = '&'#1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
+      Hint = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077'|'#1055#1086#1082#1072#1079#1072#1090#1100' '#1080#1085#1092#1086#1088#1084#1072#1094#1080#1102' '#1086' '#1087#1088#1086#1075#1088#1072#1084#1084#1077' '#1080' '#1077#1105' '#1088#1072#1079#1088#1072#1073#1086#1090#1095#1080#1082#1072#1093
+      ShortCut = 57376
       OnExecute = acnAboutExecute
     end
+  end
+  object apeEvents: TApplicationEvents
+    OnMinimize = apeEventsMinimize
+    OnRestore = apeEventsRestore
+    Left = 120
+    Top = 128
   end
 end

@@ -115,7 +115,7 @@ AutoIncBuild=1
 MajorVer=2
 MinorVer=3
 Release=1
-Build=45
+Build=47
 Debug=0
 PreRelease=0
 Special=0
@@ -126,7 +126,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=LLC AlternativaPlatform
 FileDescription=Мультишаблон для чата Танков Онлайн
-FileVersion=2.3.1.45
+FileVersion=2.3.1.47
 InternalName=Multiclip.exe
 LegalCopyright=Copyright © Antynik & Megadragon, 2009-14
 LegalTrademarks=

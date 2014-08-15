@@ -14,7 +14,7 @@ type
 		Copyright: TLabel;
 		Comments: TLabel;
 		Remarks: TLabel;
-		OKButton: TButton;
+		OKButton: TBitBtn;
 		procedure CommentsClick(Sender: TObject);
 		procedure CommentsMouseEnter(Sender: TObject);
 		procedure CommentsMouseLeave(Sender: TObject);
@@ -34,7 +34,7 @@ uses ShellAPI;
 
 procedure TAboutBox.CommentsClick(Sender: TObject);
 begin
-	ShellExecute(Handle, 'open', 'mailto:antynik@yandex.ru?bcc=ssglobov@gmail.com&subject=Multiclip%20v2.3.1.45', nil, nil, SW_SHOWNORMAL);
+	ShellExecute(Handle, 'open', 'mailto:antynik@yandex.ru?bcc=ssglobov@gmail.com&subject=Multiclip%20v2.3.1.47', nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TAboutBox.CommentsMouseEnter(Sender: TObject);
@@ -51,7 +51,7 @@ end;
 
 procedure TAboutBox.RemarksClick(Sender: TObject);
 begin
-	ShellExecute(Handle, 'open', 'mailto:ssglobov@gmail.com&subject=Multiclip%20v2.3.1.45', nil, nil, SW_SHOWNORMAL);
+	ShellExecute(Handle, 'open', 'mailto:ssglobov@gmail.com&subject=Multiclip%20v2.3.1.47', nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TAboutBox.RemarksMouseEnter(Sender: TObject);

@@ -4,18 +4,17 @@ interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, StdCtrls, ExtCtrls, ToolWin, ActnMan, ActnCtrls, ActnMenus, ActnList,
-	StdActns, XPStyleActnCtrls;
+	Dialogs, StdCtrls, ExtCtrls, ActnList, StdActns, AppEvnts;
 
 type
 	TMainForm = class(TForm)
 		lsbCommands: TListBox;
+		acnActions: TActionList;
+		acnExit: TFileExit;
+		acnAbout: TAction;
+		apeEvents: TApplicationEvents;
 		tmrMouseLeave: TTimer;
 		tmrTargetWndActivate: TTimer;
-		acmActions: TActionManager;
-		afeExit: TFileExit;
-		acnAbout: TAction;
-		ammMenuBar: TActionMainMenuBar;
 		procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer;
 			var Resize: Boolean);
 		procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -27,12 +26,13 @@ type
 			var Handled: Boolean);
 		procedure lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 			Rect: TRect; State: TOwnerDrawState);
-		procedure lsbCommandsExit(Sender: TObject);
 		procedure lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 			var Height: Integer);
 		procedure lsbCommandsMouseMove(Sender: TObject; Shift: TShiftState;
 			X, Y: Integer);
 		procedure acnAboutExecute(Sender: TObject);
+		procedure apeEventsMinimize(Sender: TObject);
+		procedure apeEventsRestore(Sender: TObject);
 		procedure tmrMouseLeaveTimer(Sender: TObject);
 		procedure tmrTargetWndActivateTimer(Sender: TObject);
 	private
@@ -153,11 +153,6 @@ begin
 	end;
 end;
 
-procedure TMainForm.lsbCommandsExit(Sender: TObject);
-begin
-	tmrMouseLeave.Enabled := True;
-end;
-
 procedure TMainForm.lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 	var Height: Integer);
 begin
@@ -183,6 +178,16 @@ end;
 procedure TMainForm.acnAboutExecute(Sender: TObject);
 begin
 	AboutBox.ShowModal;
+end;
+
+procedure TMainForm.apeEventsMinimize(Sender: TObject);
+begin
+	ShowWindow(Application.Handle, SW_SHOW);
+end;
+
+procedure TMainForm.apeEventsRestore(Sender: TObject);
+begin
+	ShowWindow(Application.Handle, SW_HIDE);
 end;
 
 procedure TMainForm.tmrMouseLeaveTimer(Sender: TObject);
@@ -267,7 +272,7 @@ var
 begin
 	for I := 0 to Commands.Count - 1 do
 		lsbCommands.Items.Add(Commands[I].Text);
-	ClientHeight := ammMenuBar.Height + lsbCommands.ItemRect(lsbCommands.Count - 1).Bottom;
+	ClientHeight := lsbCommands.ItemRect(lsbCommands.Count - 1).Bottom;
 	if Height > Screen.Height then Height := Screen.Height;
 end;
 
@@ -306,7 +311,6 @@ begin
 		if WndPos = 'Left' then Left := 0 else
 			if WndPos = 'Right' then Left := Screen.Width - WidthMax;
 		if WndPos <> 'Manual' then Width := WidthMax;
-		ammMenuBar.Height := ClientHeight - lsbCommands.Height;
 		AlphaBlend := False;
 		IsChangeForm := False;
 	end;
