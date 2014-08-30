@@ -35,19 +35,14 @@ type
 		procedure apeEventsRestore(Sender: TObject);
 		procedure tmrMouseLeaveTimer(Sender: TObject);
 		procedure tmrTargetWndActivateTimer(Sender: TObject);
-	private
-		procedure WMEnterSizeMove(var Msg: TMessage); message WM_ENTERSIZEMOVE;
-		procedure WMExitSizeMove(var Msg: TMessage); message WM_EXITSIZEMOVE;
-		procedure WMHotkey(var Msg: TWMHotkey); message WM_HOTKEY;
-		procedure WMMove(var Msg: TWMMove); message WM_MOVE;
-		procedure WMMoving(var Msg: TWMMoving); message WM_MOVING;
 	public
 		procedure LoadCommands;
 		procedure LoadFromIni;
-		procedure Restore(const Forced: Boolean = False);
+		procedure Restore;
 		procedure SaveToIni;
 		procedure SendCommand(const Number: Byte; const IsTeamChat: Boolean);
 		procedure Shrink;
+		procedure WndProc(var Msg: TMessage); override;
 	end;
 
 var
@@ -79,7 +74,7 @@ begin
 		if IsHidden then NewWidth := Width else begin
 			WidthMax := NewWidth;
 			if WndPos = 'Left' then Left := 0 else
-				if WndPos = 'Right' then Left := Screen.Width - WidthMax;
+				if WndPos = 'Right' then Left := Screen.WorkAreaWidth - WidthMax;
 		end;
 		NewHeight := Height;
 	end;
@@ -95,7 +90,7 @@ begin
 	Commands := TCommandList.Create(Handle, GetCurrentDir + '\command.lst');
 	LoadFromIni;
 	LoadCommands;
-	Restore(True);
+	Restore;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -123,6 +118,7 @@ begin
 		SendCommand(ItemIndex, False);
 		if not IsHidden then Shrink;
 	end;
+	Handled := True;
 end;
 
 procedure TMainForm.lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
@@ -182,11 +178,13 @@ end;
 
 procedure TMainForm.apeEventsMinimize(Sender: TObject);
 begin
+	Commands.UnregHK;
 	ShowWindow(Application.Handle, SW_SHOW);
 end;
 
 procedure TMainForm.apeEventsRestore(Sender: TObject);
 begin
+	Commands.RegHK;
 	ShowWindow(Application.Handle, SW_HIDE);
 end;
 
@@ -201,67 +199,12 @@ var
 begin
 	H := GetForegroundWindow;
 	if H <> Handle then hActiveWnd := H;
-	if (Tag >= 0) and (Commands[Tag].Text > '')
-		and (GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0)
+	if GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0
 	then begin
 		SendCommand(Tag, IsTeamHotkey);
-		tmrTargetWndActivate.Interval := 1000;
+		tmrTargetWndActivate.Enabled := False;
 		Tag := -1;
 	end;
-end;
-
-{ Windows messages }
-
-procedure TMainForm.WMEnterSizeMove(var Msg: TMessage);
-begin
-	tmrMouseLeave.Enabled := False;
-end;
-
-procedure TMainForm.WMExitSizeMove(var Msg: TMessage);
-begin
-	tmrMouseLeave.Enabled := True;
-end;
-
-procedure TMainForm.WMHotKey(var Msg: TWMHotKey);
-var
-	I: Byte;
-begin
-	for I := 0 to Commands.Count - 1 do begin
-		if Msg.HotKey = Commands[I].hkTeam.Atom then begin
-			Tag := I;
-			IsTeamHotkey := True;
-			Break;
-		end;
-		if Msg.HotKey = Commands[I].hkGlobal.Atom then begin
-			Tag := I;
-			IsTeamHotkey := False;
-			Break;
-		end;
-	end;
-	tmrTargetWndActivate.Interval := 100;
-end;
-
-procedure TMainForm.WMMove(var Msg: TWMMove);
-begin
-	if not IsChangeForm then begin
-		IsChangeForm := True;
-		if Left = 0 then WndPos := 'Left' else
-			if Left + Width = Screen.Width then WndPos := 'Right' else
-				WndPos := 'Manual';
-		IsChangeForm := False;
-	end;
-end;
-
-procedure TMainForm.WMMoving(var Msg: TWMMoving);
-begin
-	if Msg.DragRect^.Left < Screen.WorkAreaLeft then
-		OffsetRect(Msg.DragRect^, Screen.WorkAreaLeft - Msg.DragRect^.Left, 0);
-	if Msg.DragRect^.Top < Screen.WorkAreaTop then
-		OffsetRect(Msg.DragRect^, 0, Screen.WorkAreaTop - Msg.DragRect^.Top);
-	if Msg.DragRect^.Right > Screen.WorkAreaRect.Right then
-		OffsetRect(Msg.DragRect^, Screen.WorkAreaRect.Right - Msg.DragRect^.Right, 0);
-	if Msg.DragRect^.Bottom > Screen.WorkAreaRect.Bottom then
-		OffsetRect(Msg.DragRect^, 0, Screen.WorkAreaRect.Bottom - Msg.DragRect^.Bottom);
 end;
 
 { Secondary procedures }
@@ -281,8 +224,9 @@ begin
 	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
 		Left := ReadInteger('Settings', 'Left', Left);
 		Top := ReadInteger('Settings', 'Top', Top);
-		WidthMin := ReadInteger('Settings', 'WidthMin', 35);
+		WidthMin := ReadInteger('Settings', 'WidthMin', 132);
 		WidthMax := ReadInteger('Settings', 'WidthMax', 300);
+		if WidthMin < 132 then WidthMin := 132;
 		if WidthMax < WidthMin then WidthMax := WidthMin;
 		AlphaBlendValue := ReadInteger('Settings', 'AlphaBlendValue', 40);
 		tmrMouseLeave.Interval := ReadInteger('Settings', 'DelayBeforeMinimize', 300);
@@ -304,9 +248,9 @@ begin
 	end;
 end;
 
-procedure TMainForm.Restore(const Forced: Boolean);
+procedure TMainForm.Restore;
 begin
-	if IsHidden or Forced then begin
+	if IsHidden then begin
 		IsChangeForm := True;
 		if WndPos = 'Left' then Left := 0 else
 			if WndPos = 'Right' then Left := Screen.Width - WidthMax;
@@ -358,7 +302,7 @@ begin
 		keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0); // Press Ctrl
 		ClickKey(Ord('V'));
 		keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0); // Release Ctrl
-		if not Commands.List[Number].IsDelay then ClickKey(VK_RETURN);
+		if not Commands[Number].IsDelay then ClickKey(VK_RETURN);
 	end;
 end;
 
@@ -373,6 +317,47 @@ begin
 		AlphaBlend := True;
 		IsHidden := True;
 		IsChangeForm := False;
+	end;
+end;
+
+procedure TMainForm.WndProc(var Msg: TMessage);
+var
+	I: Byte;
+begin
+	case Msg.Msg of
+		WM_ENTERSIZEMOVE: tmrMouseLeave.Enabled := False;
+		WM_EXITSIZEMOVE: tmrMouseLeave.Enabled := True;
+		WM_HOTKEY: begin
+			for I := 0 to Commands.Count - 1 do
+				if Msg.wParam = Commands[I].hkTeam.Atom then begin
+					Tag := I;
+					IsTeamHotkey := True;
+					Break;
+				end else if Msg.wParam = Commands[I].hkGlobal.Atom then begin
+					Tag := I;
+					IsTeamHotkey := False;
+					Break;
+				end;
+			tmrTargetWndActivate.Enabled := Tag >= 0;
+		end;
+		WM_MOVE: if not IsChangeForm then begin
+			IsChangeForm := True;
+			if Left = 0 then WndPos := 'Left' else
+				if Left + Width = Screen.WorkAreaWidth then WndPos := 'Right'
+				else WndPos := 'Manual';
+			IsChangeForm := False;
+		end;
+		WM_MOVING: begin
+			if PRect(Msg.lParam)^.Left < Screen.WorkAreaLeft then
+				OffsetRect(PRect(Msg.lParam)^, Screen.WorkAreaLeft - PRect(Msg.lParam)^.Left, 0);
+			if PRect(Msg.lParam)^.Top < Screen.WorkAreaTop then
+				OffsetRect(PRect(Msg.lParam)^, 0, Screen.WorkAreaTop - PRect(Msg.lParam)^.Top);
+			if PRect(Msg.lParam)^.Right > Screen.WorkAreaRect.Right then
+				OffsetRect(PRect(Msg.lParam)^, Screen.WorkAreaRect.Right - PRect(Msg.lParam)^.Right, 0);
+			if PRect(Msg.lParam)^.Bottom > Screen.WorkAreaRect.Bottom then
+				OffsetRect(PRect(Msg.lParam)^, 0, Screen.WorkAreaRect.Bottom - PRect(Msg.lParam)^.Bottom);
+		end;
+		else inherited;
 	end;
 end;
 

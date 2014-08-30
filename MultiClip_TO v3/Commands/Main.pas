@@ -8,7 +8,7 @@ uses
 
 type
 	TfrmCommands = class(TForm)
-		mmoEditor: TMemo;
+		ltvCommandList: TListView;
 		gpbCommand: TGroupBox;
 		chbDelay: TCheckBox;
 		lbeText: TLabeledEdit;
@@ -28,6 +28,9 @@ type
 		procedure btnAddCommandClick(Sender: TObject);
 		procedure btnSeparatorClick(Sender: TObject);
 		procedure btnDeleteClick(Sender: TObject);
+	public
+		procedure LoadFromFile(const Filename: string);
+		procedure SaveToFile(const Filename: string);
 	end;
 
 var
@@ -41,16 +44,16 @@ implementation
 procedure TfrmCommands.FormCreate(Sender: TObject);
 begin
 	if FileExists(GetCurrentDir + '\command.lst') then
-		mmoEditor.Lines.LoadFromFile(GetCurrentDir + '\command.lst')
+		LoadFromFile(GetCurrentDir + '\command.lst')
 	else begin
-		MessageBox(Handle, 'Файл списка команд command.lst не найден.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING);
+		MessageBox(Handle, 'Файл списка команд command.lst не найден.', 'Редактор быстрых команд', MB_OK or MB_ICONSTOP);
 		Application.Terminate;
 	end;
 end;
 
 procedure TfrmCommands.bbnOKClick(Sender: TObject);
 begin
-	mmoEditor.Lines.SaveToFile(GetCurrentDir + '\command.lst');
+	SaveToFile(GetCurrentDir + '\command.lst');
 	Close;
 end;
 
@@ -60,39 +63,84 @@ begin
 end;
 
 procedure TfrmCommands.btnAddCommandClick(Sender: TObject);
-var
-	Buffer: string;
 begin
 	if lbeText.Text = '' then begin
 		MessageBox(Handle, 'Добавление пустой команды не имеет смысла.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING);
 		Exit;
-	end else begin
-		if chbDelay.Checked then Buffer := '%' else Buffer := '';
-		Buffer := Buffer + lbeText.Text + #9 + ShortCutToText(htkTeam.HotKey) + #9 + ShortCutToText(htkGlobal.HotKey);
-		while Buffer[Length(Buffer)] = #9 do Delete(Buffer, Length(Buffer), 1);
-		mmoEditor.Lines.Insert(mmoEditor.CaretPos.Y, Buffer);
+	end else with ltvCommandList.Items.Insert(ltvCommandList.ItemIndex) do begin
+		Caption := lbeText.Text;
+		Checked := chbDelay.Checked;
+		SubItems.Add(ShortCutToText(htkTeam.HotKey));
+		SubItems.Add(ShortCutToText(htkGlobal.HotKey));
 	end;
 	chbDelay.Checked := False;
 	lbeText.Text := '';
 	htkTeam.HotKey := TextToShortCut('');
 	htkGlobal.HotKey := TextToShortCut('');
-	mmoEditor.SetFocus;
 end;
 
 procedure TfrmCommands.btnSeparatorClick(Sender: TObject);
 begin
-	if mmoEditor.CaretPos.Y > 0 then
-		if (mmoEditor.Lines[mmoEditor.CaretPos.Y] = '') or (mmoEditor.Lines[mmoEditor.CaretPos.Y - 1] = '')
+	if ltvCommandList.ItemIndex > 0 then
+		if (ltvCommandList.Selected.Caption = '')
 		then MessageBox(Handle, 'Двойной разделитель не имеет смысла.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING)
-		else mmoEditor.Lines.Insert(mmoEditor.CaretPos.Y, '')
+		else ltvCommandList.Items.Insert(ltvCommandList.ItemIndex).Caption := ''
 	else MessageBox(Handle, 'Разделитель в начале списка не имеет смысла.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING);
-	mmoEditor.SetFocus;
 end;
 
 procedure TfrmCommands.btnDeleteClick(Sender: TObject);
 begin
-	mmoEditor.Lines.Delete(mmoEditor.CaretPos.Y);
-	mmoEditor.SetFocus;
+	ltvCommandList.DeleteSelected;
+end;
+
+procedure TfrmCommands.LoadFromFile(const Filename: string);
+var
+	CmdFile: TextFile;
+	Buffer, Text: string;
+	TabPos: Byte;
+begin
+	AssignFile(CmdFile, Filename);
+	Reset(CmdFile);
+	while not Eof(CmdFile) do begin
+		ReadLn(CmdFile, Buffer);
+		if Buffer = '' then ltvCommandList.Items.Add.Caption := '' else
+			with ltvCommandList.Items.Add do begin
+				TabPos := Pos(#9, Buffer);
+				if TabPos > 0 then begin
+					Text := Copy(Buffer, 1, TabPos - 1);
+					Checked := Text[1] = '%';
+					if Checked then System.Delete(Text, 1, 1);
+					Caption := Text;
+					System.Delete(Buffer, 1, TabPos);
+					TabPos := Pos(#9, Buffer);
+					if TabPos > 0 then begin
+						SubItems.Add(Copy(Buffer, 1, TabPos - 1));
+						System.Delete(Buffer, 1, TabPos);
+					end;
+					SubItems.Add(Buffer);
+				end else Caption := Buffer;
+			end;
+	end;
+	CloseFile(CmdFile);
+end;
+
+procedure TfrmCommands.SaveToFile(const Filename: string);
+var
+	CmdFile: TextFile;
+	I: Byte;
+begin
+	AssignFile(CmdFile, Filename);
+	Rewrite(CmdFile);
+	for I := 0 to ltvCommandList.Items.Count - 1 do
+		if ltvCommandList.Items[I].Caption = '' then WriteLn(CmdFile)
+		else with ltvCommandList.Items[I] do begin
+			if Checked then Write(CmdFile, '%');
+			Write(CmdFile, Caption);
+			if SubItems.Count > 0 then Write(CmdFile, #9, SubItems[0]);
+			if SubItems.Count > 1 then Write(CmdFile, #9, SubItems[1]);
+			if I + 1 < ltvCommandList.Items.Count then WriteLn(CmdFile);
+		end;
+	CloseFile(CmdFile);
 end;
 
 end.

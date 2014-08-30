@@ -34,7 +34,7 @@ object frmCommands: TfrmCommands
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
-    TabOrder = 4
+    TabOrder = 3
     OnClick = bbnOKClick
     Kind = bkOK
   end
@@ -44,28 +44,9 @@ object frmCommands: TfrmCommands
     Width = 75
     Height = 25
     Anchors = [akRight, akBottom]
-    TabOrder = 5
+    TabOrder = 4
     OnClick = bbnCancelClick
     Kind = bkCancel
-  end
-  object mmoEditor: TMemo
-    Left = 8
-    Top = 8
-    Width = 417
-    Height = 297
-    TabStop = False
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    Font.Charset = RUSSIAN_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'MS Sans Serif'
-    Font.Style = []
-    ParentFont = False
-    ReadOnly = True
-    ScrollBars = ssBoth
-    TabOrder = 0
-    WantReturns = False
-    WordWrap = False
   end
   object gpbCommand: TGroupBox
     Left = 432
@@ -80,7 +61,7 @@ object frmCommands: TfrmCommands
     Font.Name = 'MS Sans Serif'
     Font.Style = []
     ParentFont = False
-    TabOrder = 1
+    TabOrder = 0
     DesignSize = (
       193
       217)
@@ -154,7 +135,7 @@ object frmCommands: TfrmCommands
     Width = 177
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100' '#1088#1072#1079#1076#1077#1083#1080#1090#1077#1083#1100
-    TabOrder = 2
+    TabOrder = 1
     OnClick = btnSeparatorClick
   end
   object btnDelete: TButton
@@ -163,7 +144,35 @@ object frmCommands: TfrmCommands
     Width = 177
     Height = 25
     Caption = #1059#1076#1072#1083#1080#1090#1100' '#1089#1090#1088#1086#1082#1091
-    TabOrder = 3
+    TabOrder = 2
     OnClick = btnDeleteClick
+  end
+  object ltvCommandList: TListView
+    Left = 8
+    Top = 8
+    Width = 417
+    Height = 297
+    Checkboxes = True
+    Columns = <
+      item
+        AutoSize = True
+        Caption = #1050#1086#1084#1072#1085#1076#1072
+      end
+      item
+        AutoSize = True
+        Caption = #1050#1086#1084#1072#1085#1076#1085#1072#1103' '#1075#1086#1088#1103#1095#1072#1103' '#1082#1083#1072#1074#1080#1096#1072
+      end
+      item
+        AutoSize = True
+        Caption = #1054#1073#1097#1072#1103' '#1075#1086#1088#1103#1095#1072#1103' '#1082#1083#1072#1074#1080#1096#1072
+      end>
+    ColumnClick = False
+    GridLines = True
+    HideSelection = False
+    IconOptions.Arrangement = iaLeft
+    ReadOnly = True
+    RowSelect = True
+    TabOrder = 5
+    ViewStyle = vsReport
   end
 end

@@ -92,7 +92,8 @@ object MainForm: TMainForm
     Top = 200
   end
   object tmrTargetWndActivate: TTimer
-    Interval = 300
+    Enabled = False
+    Interval = 100
     OnTimer = tmrTargetWndActivateTimer
     Left = 48
     Top = 264
