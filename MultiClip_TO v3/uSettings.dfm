@@ -2218,7 +2218,9 @@ object frmSettings: TfrmSettings
         Height = 21
         Style = csDropDownList
         ItemHeight = 13
+        ItemIndex = 1
         TabOrder = 3
+        Text = 'Right'
         Items.Strings = (
           'Left'
           'Right'

@@ -112,10 +112,10 @@ RootDir=
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=1
-MajorVer=2
-MinorVer=4
+MajorVer=3
+MinorVer=0
 Release=0
-Build=50
+Build=51
 Debug=0
 PreRelease=0
 Special=0
@@ -126,13 +126,13 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=LLC AlternativaPlatform
 FileDescription=Мультишаблон для чата Танков Онлайн
-FileVersion=2.4.0.50
+FileVersion=3.0.0.51
 InternalName=Multiclip.exe
 LegalCopyright=Copyright © Antynik & Megadragon, 2009-14
 LegalTrademarks=
 OriginalFilename=MulticlipXX.exe
 ProductName=Multiclip
-ProductVersion=2.4
+ProductVersion=3.0
 Comments=
 [HistoryLists\hlUnitAliases]
 Count=1

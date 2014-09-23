@@ -1,4 +1,4 @@
-unit Main;
+unit uCommands;
 
 interface
 
@@ -39,7 +39,6 @@ var
 implementation
 
 {$R *.dfm}
-{$R WindowsXP.res}
 
 procedure TfrmCommands.FormCreate(Sender: TObject);
 begin

@@ -207,14 +207,16 @@ begin
 	end;
 end;
 
-{ Secondary procedures }
+{ Public procedures }
 
 procedure TMainForm.LoadCommands;
 var
 	I: Byte;
 begin
+	lsbCommands.Items.BeginUpdate;
 	for I := 0 to Commands.Count - 1 do
 		lsbCommands.Items.Add(Commands[I].Text);
+	lsbCommands.Items.EndUpdate;
 	ClientHeight := lsbCommands.ItemRect(lsbCommands.Count - 1).Bottom;
 	if Height > Screen.Height then Height := Screen.Height;
 end;
@@ -225,8 +227,8 @@ begin
 		Left := ReadInteger('Settings', 'Left', Left);
 		Top := ReadInteger('Settings', 'Top', Top);
 		WidthMin := ReadInteger('Settings', 'WidthMin', 132);
-		WidthMax := ReadInteger('Settings', 'WidthMax', 300);
 		if WidthMin < 132 then WidthMin := 132;
+		WidthMax := ReadInteger('Settings', 'WidthMax', 300);
 		if WidthMax < WidthMin then WidthMax := WidthMin;
 		AlphaBlendValue := ReadInteger('Settings', 'AlphaBlendValue', 40);
 		tmrMouseLeave.Interval := ReadInteger('Settings', 'DelayBeforeMinimize', 300);
@@ -267,7 +269,6 @@ begin
 	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
 		WriteInteger('Settings', 'Left', Left);
 		WriteInteger('Settings', 'Top', Top);
-		WriteInteger('Settings', 'WidthMin', WidthMin);
 		WriteInteger('Settings', 'WidthMax', WidthMax);
 		WriteString('Settings', 'WindowPosition', WndPos);
 	finally

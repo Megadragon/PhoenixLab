@@ -1,4 +1,4 @@
-unit Main;
+unit uSettings;
 
 interface
 
@@ -53,7 +53,6 @@ var
 implementation
 
 {$R *.dfm}
-{$R WindowsXP.res}
 
 procedure TfrmSettings.FormCreate(Sender: TObject);
 begin

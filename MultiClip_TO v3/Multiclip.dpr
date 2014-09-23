@@ -1,12 +1,16 @@
 program Multiclip;
 
 uses
-	Forms, Windows,
+	Forms,
+	Windows,
 	uMain in 'uMain.pas' {MainForm},
 	uAbout in 'uAbout.pas' {AboutBox},
-	uCommandList in 'uCommandList.pas';
+	uCommandList in 'uCommandList.pas',
+	uCommands in 'uCommands.pas' {frmCommands},
+	uSettings in 'uSettings.pas' {frmSettings};
 
 {$R *.res}
+{$R WindowsXP.res}
 
 var
 	hMutex: THandle;
@@ -25,9 +29,12 @@ end;
 begin
 	if CheckMutex then begin
 		Application.Title := 'Multiclip';
-		Application.CreateForm(TMainForm, MainForm);
-		Application.CreateForm(TAboutBox, AboutBox);
-		ShowWindow(Application.Handle, SW_HIDE);
+		if ParamCount = 0 then begin
+			Application.CreateForm(TMainForm, MainForm);
+			Application.CreateForm(TAboutBox, AboutBox);
+			ShowWindow(Application.Handle, SW_HIDE);
+		end else if ParamStr(1) = '/settings' then Application.CreateForm(TfrmSettings, frmSettings)
+		else if ParamStr(1) = '/commands' then Application.CreateForm(TfrmCommands, frmCommands);
 		Application.Run;
 		ReleaseMutex(hMutex);
 	end;
