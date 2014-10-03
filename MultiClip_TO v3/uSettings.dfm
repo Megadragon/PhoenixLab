@@ -4,7 +4,7 @@ object frmSettings: TfrmSettings
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = #1056#1077#1076#1072#1082#1090#1086#1088' '#1085#1072#1089#1090#1088#1086#1077#1082' Multiclip'
-  ClientHeight = 321
+  ClientHeight = 273
   ClientWidth = 241
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -2135,22 +2135,22 @@ object frmSettings: TfrmSettings
   OnCreate = FormCreate
   DesignSize = (
     241
-    321)
+    273)
   PixelsPerInch = 96
   TextHeight = 13
   object pgcTabs: TPageControl
     Left = 8
     Top = 8
     Width = 225
-    Height = 273
-    ActivePage = tbsForm
+    Height = 225
+    ActivePage = tbsList
     HotTrack = True
     TabOrder = 0
     object tbsForm: TTabSheet
       Caption = #1055#1072#1088#1072#1084#1077#1090#1088#1099' '#1086#1082#1085#1072
       DesignSize = (
         217
-        245)
+        197)
       object lblWidthMin: TLabel
         Left = 8
         Top = 12
@@ -2160,21 +2160,21 @@ object frmSettings: TfrmSettings
       end
       object lblAlpha: TLabel
         Left = 8
-        Top = 60
+        Top = 44
         Width = 72
         Height = 13
         Caption = #1055#1088#1086#1079#1088#1072#1095#1085#1086#1089#1090#1100
       end
       object lblDelay: TLabel
         Left = 8
-        Top = 108
+        Top = 76
         Width = 132
         Height = 13
         Caption = #1047#1072#1076#1077#1088#1078#1082#1072' '#1087#1077#1088#1077#1076' '#1089#1078#1072#1090#1080#1077#1084
       end
       object lblWndPos: TLabel
         Left = 8
-        Top = 156
+        Top = 116
         Width = 71
         Height = 13
         Caption = #1055#1086#1079#1080#1094#1080#1103' '#1086#1082#1085#1072
@@ -2191,7 +2191,7 @@ object frmSettings: TfrmSettings
       end
       object speDelay: TSpinEdit
         Left = 152
-        Top = 104
+        Top = 72
         Width = 57
         Height = 22
         Increment = 5
@@ -2202,7 +2202,7 @@ object frmSettings: TfrmSettings
       end
       object lbeTargetWnd: TLabeledEdit
         Left = 8
-        Top = 216
+        Top = 168
         Width = 201
         Height = 21
         Anchors = [akLeft, akTop, akRight]
@@ -2213,7 +2213,7 @@ object frmSettings: TfrmSettings
       end
       object cbbWndPos: TComboBox
         Left = 88
-        Top = 152
+        Top = 112
         Width = 121
         Height = 21
         Style = csDropDownList
@@ -2228,7 +2228,7 @@ object frmSettings: TfrmSettings
       end
       object speAlpha: TSpinEdit
         Left = 152
-        Top = 56
+        Top = 40
         Width = 57
         Height = 22
         MaxValue = 255
@@ -2242,14 +2242,7 @@ object frmSettings: TfrmSettings
       ImageIndex = 1
       DesignSize = (
         217
-        245)
-      object lblHKPos: TLabel
-        Left = 8
-        Top = 60
-        Width = 127
-        Height = 13
-        Caption = #1055#1086#1079#1080#1094#1080#1103' '#1075#1086#1088#1103#1095#1080#1093' '#1082#1083#1072#1074#1080#1096
-      end
+        197)
       object lblHKFontSz: TLabel
         Left = 8
         Top = 36
@@ -2266,49 +2259,42 @@ object frmSettings: TfrmSettings
       end
       object bvlSeparator: TBevel
         Left = 8
-        Top = 80
+        Top = 56
         Width = 201
         Height = 9
         Anchors = [akLeft, akTop, akRight]
       end
       object lblList: TLabel
         Left = 8
-        Top = 100
+        Top = 76
         Width = 54
         Height = 13
         Caption = #1062#1074#1077#1090' '#1092#1086#1085#1072
       end
       object lblSelected: TLabel
         Left = 8
-        Top = 124
+        Top = 100
         Width = 84
         Height = 13
         Caption = #1062#1074#1077#1090' '#1074#1099#1076#1077#1083#1077#1085#1080#1103
       end
       object lblText: TLabel
         Left = 8
-        Top = 148
+        Top = 124
         Width = 62
         Height = 13
         Caption = #1062#1074#1077#1090' '#1090#1077#1082#1089#1090#1072
       end
-      object lblHKTeam: TLabel
+      object lblHotkey: TLabel
         Left = 8
-        Top = 172
+        Top = 148
         Width = 74
         Height = 13
         Caption = #1062#1074#1077#1090' '#1082#1086#1084#1072#1085#1076#1099
       end
-      object lblHKGlobal: TLabel
-        Left = 8
-        Top = 196
-        Width = 91
-        Height = 13
-        Caption = #1062#1074#1077#1090' '#1086#1073#1097#1077#1075#1086' '#1095#1072#1090#1072
-      end
       object lblSeparator: TLabel
         Left = 8
-        Top = 220
+        Top = 172
         Width = 93
         Height = 13
         Caption = #1062#1074#1077#1090' '#1088#1072#1079#1076#1077#1083#1080#1090#1077#1083#1103
@@ -2323,20 +2309,6 @@ object frmSettings: TfrmSettings
         TabOrder = 0
         Value = 15
       end
-      object cbbHKPos: TComboBox
-        Left = 144
-        Top = 56
-        Width = 65
-        Height = 21
-        Style = csDropDownList
-        ItemHeight = 13
-        ItemIndex = 1
-        TabOrder = 1
-        Text = 'Right'
-        Items.Strings = (
-          'Down'
-          'Right')
-      end
       object speFontSz: TSpinEdit
         Left = 168
         Top = 7
@@ -2345,82 +2317,72 @@ object frmSettings: TfrmSettings
         Increment = 2
         MaxValue = 72
         MinValue = 0
-        TabOrder = 2
+        TabOrder = 1
         Value = 30
       end
       object crbList: TColorBox
         Left = 120
-        Top = 96
+        Top = 72
         Width = 89
         Height = 22
         DefaultColorColor = clWhite
-        Selected = clWhite
+        Selected = clGreen
         Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames]
         ItemHeight = 16
-        TabOrder = 3
+        TabOrder = 2
         OnSelect = ColorBoxSelect
       end
       object crbSelected: TColorBox
         Left = 120
-        Top = 120
+        Top = 96
         Width = 89
         Height = 22
         DefaultColorColor = clLime
         Selected = clLime
         Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames]
         ItemHeight = 16
-        TabOrder = 4
+        TabOrder = 3
         OnSelect = ColorBoxSelect
       end
       object crbText: TColorBox
         Left = 120
+        Top = 120
+        Width = 89
+        Height = 22
+        Selected = clWhite
+        Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames]
+        ItemHeight = 16
+        TabOrder = 4
+        OnSelect = ColorBoxSelect
+      end
+      object crbHotkey: TColorBox
+        Left = 120
         Top = 144
         Width = 89
         Height = 22
+        DefaultColorColor = clOlive
+        Selected = clYellow
         Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames]
         ItemHeight = 16
         TabOrder = 5
         OnSelect = ColorBoxSelect
       end
-      object crbHKTeam: TColorBox
+      object crbSeparator: TColorBox
         Left = 120
         Top = 168
         Width = 89
         Height = 22
-        DefaultColorColor = clOlive
-        Selected = clOlive
+        Selected = clBlue
         Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames]
         ItemHeight = 16
         TabOrder = 6
-        OnSelect = ColorBoxSelect
-      end
-      object crbHKGlobal: TColorBox
-        Left = 120
-        Top = 192
-        Width = 89
-        Height = 22
-        DefaultColorColor = clGreen
-        Selected = clGreen
-        Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames]
-        ItemHeight = 16
-        TabOrder = 7
-        OnSelect = ColorBoxSelect
-      end
-      object crbSeparator: TColorBox
-        Left = 120
-        Top = 216
-        Width = 89
-        Height = 22
-        Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames]
-        ItemHeight = 16
-        TabOrder = 8
         OnSelect = ColorBoxSelect
       end
     end
   end
   object bbnOK: TBitBtn
     Left = 40
-    Top = 288
+    Top = 240
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
@@ -2430,7 +2392,7 @@ object frmSettings: TfrmSettings
   end
   object bbnCancel: TBitBtn
     Left = 128
-    Top = 288
+    Top = 240
     Width = 75
     Height = 25
     Anchors = [akRight, akBottom]

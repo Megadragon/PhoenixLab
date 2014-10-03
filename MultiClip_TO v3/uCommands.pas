@@ -13,9 +13,7 @@ type
 		chbDelay: TCheckBox;
 		lbeText: TLabeledEdit;
 		lblTeamHotkey: TLabel;
-		lblGlobalHotkey: TLabel;
-		htkTeam: THotKey;
-		htkGlobal: THotKey;
+		htkHotkey: THotKey;
 		btnAddCommand: TButton;
 		bvlControl: TBevel;
 		btnSeparator: TButton;
@@ -45,7 +43,7 @@ begin
 	if FileExists(GetCurrentDir + '\command.lst') then
 		LoadFromFile(GetCurrentDir + '\command.lst')
 	else begin
-		MessageBox(Handle, 'Файл списка команд command.lst не найден.', 'Редактор быстрых команд', MB_OK or MB_ICONSTOP);
+		MessageBox(Handle, 'Файл списка команд command.lst не найден.', 'Редактор быстрых команд', MB_OK or MB_ICONSTOP or MB_SYSTEMMODAL);
 		Application.Terminate;
 	end;
 end;
@@ -69,13 +67,11 @@ begin
 	end else with ltvCommandList.Items.Insert(ltvCommandList.ItemIndex) do begin
 		Caption := lbeText.Text;
 		Checked := chbDelay.Checked;
-		SubItems.Add(ShortCutToText(htkTeam.HotKey));
-		SubItems.Add(ShortCutToText(htkGlobal.HotKey));
+		SubItems.Add(ShortCutToText(htkHotkey.HotKey));
 	end;
 	chbDelay.Checked := False;
 	lbeText.Text := '';
-	htkTeam.HotKey := TextToShortCut('');
-	htkGlobal.HotKey := TextToShortCut('');
+	htkHotkey.HotKey := TextToShortCut('');
 end;
 
 procedure TfrmCommands.btnSeparatorClick(Sender: TObject);
@@ -95,7 +91,7 @@ end;
 procedure TfrmCommands.LoadFromFile(const Filename: string);
 var
 	CmdFile: TextFile;
-	Buffer, Text: string;
+	Buffer: string;
 	TabPos: Byte;
 begin
 	AssignFile(CmdFile, Filename);
@@ -105,19 +101,13 @@ begin
 		if Buffer = '' then ltvCommandList.Items.Add.Caption := '' else
 			with ltvCommandList.Items.Add do begin
 				TabPos := Pos(#9, Buffer);
-				if TabPos > 0 then begin
-					Text := Copy(Buffer, 1, TabPos - 1);
-					Checked := Text[1] = '%';
-					if Checked then System.Delete(Text, 1, 1);
-					Caption := Text;
+				if TabPos = 0 then Caption := Buffer else begin
+					Caption := Copy(Buffer, 1, TabPos - 1);
 					System.Delete(Buffer, 1, TabPos);
-					TabPos := Pos(#9, Buffer);
-					if TabPos > 0 then begin
-						SubItems.Add(Copy(Buffer, 1, TabPos - 1));
-						System.Delete(Buffer, 1, TabPos);
-					end;
-					SubItems.Add(Buffer);
-				end else Caption := Buffer;
+					if TextToShortCut(Buffer) > 0 then SubItems.Add(Buffer);
+				end;
+				Checked := Caption[1] = '%';
+				if Checked then Caption := Copy(Caption, 2, 255);
 			end;
 	end;
 	CloseFile(CmdFile);
@@ -136,7 +126,6 @@ begin
 			if Checked then Write(CmdFile, '%');
 			Write(CmdFile, Caption);
 			if SubItems.Count > 0 then Write(CmdFile, #9, SubItems[0]);
-			if SubItems.Count > 1 then Write(CmdFile, #9, SubItems[1]);
 			if I + 1 < ltvCommandList.Items.Count then WriteLn(CmdFile);
 		end;
 	CloseFile(CmdFile);

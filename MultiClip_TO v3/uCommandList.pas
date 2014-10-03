@@ -2,6 +2,8 @@ unit uCommandList;
 
 interface
 
+uses Contnrs;
+
 type
 	THotKey = record
 		Atom: Word;
@@ -11,124 +13,115 @@ type
 		AsString: string;
 	end;
 
-	TCommand = record
-		IsDelay: Boolean;
-		Text: string;
-		hkTeam: THotKey;
-		hkGlobal: THotKey;
+	TCommand = class
+	private
+		FIsDelay: Boolean;
+		FText: string;
+		FHotKey: THotKey;
+	public
+		constructor Create(ASource: string; const AIndex: Byte);
+		destructor Destroy; override;
+		procedure RegHotKey;
+		procedure UnregHotKey;
+		property IsDelay: Boolean read FIsDelay;
+		property Text: string read FText;
+		property HotKey: THotKey read FHotKey;
 	end;
 
-	TCommandList = class
+	TCommandList = class(TObjectList)
 	private
-		FCount: Byte;
-		FList: array of TCommand;
-		FOwnerID: Cardinal;
-		procedure FillHKByID(var AHotKey: THotKey; const ID: string);
 		function GetItem(Index: Byte): TCommand;
 	public
-		constructor Create(AOwnerID: Cardinal; AFilename: string);
-		destructor Destroy; override;
+		constructor Create(const AFilename: string);
 		procedure LoadFromFile(const AFilename: string);
 		procedure RegHK;
 		procedure UnregHK;
-		property Count: Byte read FCount;
-		property OwnerID: Cardinal read FOwnerID;
 		property List[Index: Byte]: TCommand read GetItem; default;
 	end;
 
 var
 	Commands: TCommandList;
+	hOwner: THandle;
 
 implementation
 
-uses Windows, SysUtils, Menus;
+uses Windows, SysUtils, Classes, Menus;
+
+{ TCommand }
+
+constructor TCommand.Create(ASource: string; const AIndex: Byte);
+var
+	TabPos: Byte;
+	Shortcut: TShortCut;
+begin
+	if ASource = '' then Exit else begin
+		FIsDelay := ASource[1] = '%';
+		if IsDelay then Delete(ASource, 1, 1);
+		TabPos := Pos(#9, ASource);
+		if TabPos = 0 then FText := ASource else begin
+			FText := Copy(ASource, 1, TabPos - 1);
+			Delete(ASource, 1, TabPos);
+			with HotKey do begin
+				AsString := ASource;
+				Shortcut := TextToShortCut(AsString);
+				if Shortcut > 0 then begin
+					Atom := GlobalAddAtom(PChar('Multiclip_Chat_' + IntToStr(AIndex)));
+					Modifiers := 0;
+					if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
+					if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
+					if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
+					VirtualCode := Shortcut;
+				end;
+			end;
+		end;
+	end;
+end;
+
+destructor TCommand.Destroy;
+begin
+	with HotKey do if Atom > 0 then begin
+		UnregHotKey;
+		GlobalDeleteAtom(Atom);
+	end;
+end;
+
+procedure TCommand.RegHotKey;
+begin
+	with FHotKey do if Atom > 0 then
+		IsRegister := RegisterHotKey(hOwner, Atom, Modifiers, VirtualCode);
+end;
+
+procedure TCommand.UnregHotKey;
+begin
+	with HotKey do if (Atom > 0) and IsRegister then
+		UnregisterHotKey(hOwner, Atom);
+end;
 
 { TCommandList }
 
-constructor TCommandList.Create(AOwnerID: Cardinal; AFilename: string);
+constructor TCommandList.Create(const AFilename: string);
 begin
-	FCount := 0;
-	FOwnerID := AOwnerID;
+	inherited;
 	LoadFromFile(AFilename);
 	RegHK;
 end;
 
-destructor TCommandList.Destroy;
-var
-	I: Byte;
-begin
-	UnregHK;
-	for I := 0 to Count - 1 do begin
-		if Self[I].hkTeam.Atom > 0 then GlobalDeleteAtom(Self[I].hkTeam.Atom);
-		if Self[I].hkGlobal.Atom > 0 then GlobalDeleteAtom(Self[I].hkGlobal.Atom);
-	end;
-	FCount := 0;
-	SetLength(FList, Count);
-end;
-
-procedure TCommandList.FillHKByID(var AHotKey: THotKey; const ID: string);
-const
-	// from unit Classes
-	scNone = 0;
-	scShift = $2000;
-	scCtrl = $4000;
-	scAlt = $8000;
-var
-	Shortcut: Word;
-begin
-	with AHotKey do begin
-		Shortcut := TextToShortCut(AsString);
-		if Shortcut > 0 then begin
-			Atom := GlobalAddAtom(PChar(ID));
-			Modifiers := 0;
-			if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
-			if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
-			if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
-			VirtualCode := Shortcut;
-		end else AsString := '';
-	end;
-end;
-
 function TCommandList.GetItem(Index: Byte): TCommand;
 begin
-	Result := FList[Index];
+	if Index < Count then Result := Items[Index] as TCommand else Result := nil;
 end;
 
 procedure TCommandList.LoadFromFile(const AFilename: string);
 var
 	CmdList: TextFile;
 	Buffer: string;
-	TabPos: Byte;
 begin
 	if FileExists(AFilename) then begin
 		AssignFile(CmdList, AFilename);
 		Reset(CmdList);
 		while not Eof(CmdList) do begin
 			ReadLn(CmdList, Buffer);
-			Inc(FCount);
-			SetLength(FList, Count);
-			with FList[Count - 1] do begin
-				hkTeam.Atom := 0;
-				hkTeam.IsRegister := False;
-				hkGlobal.Atom := 0;
-				hkGlobal.IsRegister := False;
-				if Buffer = '' then Continue;
-				IsDelay := Buffer[1] = '%';
-				if IsDelay then Delete(Buffer, 1, 1);
-				TabPos := Pos(#9, Buffer);
-				if TabPos > 0 then begin
-					Text := Copy(Buffer, 1, TabPos - 1);
-					Delete(Buffer, 1, TabPos);
-					TabPos := Pos(#9, Buffer);
-					if TabPos > 0 then begin
-						hkTeam.AsString := Copy(Buffer, 1, TabPos - 1);
-						Delete(Buffer, 1, TabPos);
-						hkGlobal.AsString := Buffer;
-					end else hkTeam.AsString := Buffer;
-					FillHKByID(hkTeam, 'Team_Chat_' + IntToStr(Count - 1));
-					FillHKByID(hkGlobal, 'Global_Chat_' + IntToStr(Count - 1));
-				end else Text := Buffer;
-			end;
+			Add(TCommand.Create(Buffer, Count));
 		end;
 		CloseFile(CmdList);
 	end;
@@ -138,24 +131,14 @@ procedure TCommandList.RegHK;
 var
 	I: Byte;
 begin
-	for I := 0 to Count - 1 do with Self[I] do begin
-		if hkTeam.Atom > 0 then FList[I].hkTeam.IsRegister :=
-			RegisterHotKey(OwnerID, hkTeam.Atom, hkTeam.Modifiers, hkTeam.VirtualCode);
-		if hkGlobal.Atom > 0 then FList[I].hkGlobal.IsRegister :=
-			RegisterHotKey(OwnerID, hkGlobal.Atom, hkGlobal.Modifiers, hkGlobal.VirtualCode);
-	end;
+	for I := 0 to Count - 1 do Self[I].RegHotKey;
 end;
 
 procedure TCommandList.UnregHK;
 var
 	I: Byte;
 begin
-	for I := 0 to Count - 1 do with Self[I] do begin
-		if (hkTeam.Atom > 0) and hkTeam.IsRegister then
-			UnregisterHotkey(OwnerID, hkTeam.Atom);
-		if (hkGlobal.Atom > 0) and hkGlobal.IsRegister then
-			UnregisterHotkey(OwnerID, hkGlobal.Atom);
-	end;
+	for I := 0 to Count - 1 do Self[I].UnregHotKey;
 end;
 
 end.

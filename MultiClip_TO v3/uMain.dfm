@@ -79,7 +79,6 @@ object MainForm: TMainForm
     ParentFont = False
     TabOrder = 0
     OnClick = lsbCommandsClick
-    OnContextPopup = lsbCommandsContextPopup
     OnDrawItem = lsbCommandsDrawItem
     OnMeasureItem = lsbCommandsMeasureItem
     OnMouseMove = lsbCommandsMouseMove
@@ -92,8 +91,6 @@ object MainForm: TMainForm
     Top = 200
   end
   object tmrTargetWndActivate: TTimer
-    Enabled = False
-    Interval = 100
     OnTimer = tmrTargetWndActivateTimer
     Left = 48
     Top = 264

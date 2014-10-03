@@ -22,8 +22,6 @@ type
 		procedure FormDestroy(Sender: TObject);
 		procedure FormResize(Sender: TObject);
 		procedure lsbCommandsClick(Sender: TObject);
-		procedure lsbCommandsContextPopup(Sender: TObject; MousePos: TPoint;
-			var Handled: Boolean);
 		procedure lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 			Rect: TRect; State: TOwnerDrawState);
 		procedure lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
@@ -40,7 +38,7 @@ type
 		procedure LoadFromIni;
 		procedure Restore;
 		procedure SaveToIni;
-		procedure SendCommand(const Number: Byte; const IsTeamChat: Boolean);
+		procedure SendCommand(const Number: Byte);
 		procedure Shrink;
 		procedure WndProc(var Msg: TMessage); override;
 	end;
@@ -54,12 +52,11 @@ var
 
 	clList, clSelected: TColor;
 	clText, clSeparator: TColor;
-	clHKTeam, clHKGlobal: TColor;
+	clHotkey: TColor;
 
 	hActiveWnd: THandle;
-	IsTeamHotkey: Boolean;
 	TargetWndName: string;
-	WndPos, HKPos: string;
+	WndPos: string;
 
 implementation
 
@@ -87,7 +84,8 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-	Commands := TCommandList.Create(Handle, GetCurrentDir + '\command.lst');
+	hOwner := Handle;
+	Commands := TCommandList.Create(GetCurrentDir + '\command.lst');
 	LoadFromIni;
 	LoadCommands;
 	Restore;
@@ -106,19 +104,9 @@ end;
 procedure TMainForm.lsbCommandsClick(Sender: TObject);
 begin
 	with lsbCommands do if Items[ItemIndex] > '' then begin
-		SendCommand(ItemIndex, True);
+		SendCommand(ItemIndex);
 		if not IsHidden then Shrink;
 	end;
-end;
-
-procedure TMainForm.lsbCommandsContextPopup(Sender: TObject;
-	MousePos: TPoint; var Handled: Boolean);
-begin
-	with lsbCommands do if Items[ItemIndex] > '' then begin
-		SendCommand(ItemIndex, False);
-		if not IsHidden then Shrink;
-	end;
-	Handled := True;
 end;
 
 procedure TMainForm.lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
@@ -130,20 +118,15 @@ begin
 		Brush.Color := clSeparator;
 		FillRect(Rect);
 	end else begin
-		if Index = lsbCommands.ItemIndex then Brush.Color := clSelected
-		else Brush.Color := clList;
+		if Index = lsbCommands.ItemIndex then Brush.Color := clSelected else Brush.Color := clList;
 		FillRect(Rect);
 		Font.Height := FontSz;
 		Font.Color := clText;
 		TextOut(Rect.Left + 2, Rect.Top, Commands[Index].Text);
 		Font.Height := HKFontSz;
-		if Commands[Index].hkTeam.IsRegister then Font.Color := clHKTeam else Font.Color := clRed;
-		hkWidth := TextWidth(Commands[Index].hkTeam.AsString);
-		if HKPos = 'Down' then TextOut(Rect.Left + 2, Rect.Bottom - HKFontSz, Commands[Index].hkTeam.AsString)
-		else TextOut(Rect.Right - hkWidth - 2, Rect.Top, Commands[Index].hkTeam.AsString);
-		if Commands[Index].hkGlobal.IsRegister then Font.Color := clHKGlobal else Font.Color := clRed;
-		hkWidth := TextWidth(Commands[Index].hkGlobal.AsString);
-		TextOut(Rect.Right - hkWidth - 2, Rect.Bottom - HKFontSz, Commands[Index].hkGlobal.AsString);
+		if Commands[Index].HotKey.IsRegister then Font.Color := clHotkey else Font.Color := clRed;
+		hkWidth := TextWidth(Commands[Index].HotKey.AsString);
+		TextOut(Rect.Right - hkWidth - 2, Rect.Top, Commands[Index].HotKey.AsString);
 		Brush.Color := clWhite;
 		Font.Color := clBlack;
 	end;
@@ -152,9 +135,7 @@ end;
 procedure TMainForm.lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 	var Height: Integer);
 begin
-	if lsbCommands.Items[Index] = '' then Height := 2 else
-		if (HKPos = 'Down') and (Commands[Index].hkTeam.Atom or Commands[Index].hkGlobal.Atom <> 0)
-		then Height := FontSz + HKFontSz else Height := FontSz;
+	if lsbCommands.Items[Index] = '' then Height := 2 else Height := FontSz;
 end;
 
 procedure TMainForm.lsbCommandsMouseMove(Sender: TObject; Shift: TShiftState;
@@ -199,10 +180,9 @@ var
 begin
 	H := GetForegroundWindow;
 	if H <> Handle then hActiveWnd := H;
-	if GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0
+	if (Tag >= 0) and (GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0)
 	then begin
-		SendCommand(Tag, IsTeamHotkey);
-		tmrTargetWndActivate.Enabled := False;
+		SendCommand(Tag);
 		Tag := -1;
 	end;
 end;
@@ -234,16 +214,13 @@ begin
 		tmrMouseLeave.Interval := ReadInteger('Settings', 'DelayBeforeMinimize', 300);
 		FontSz := ReadInteger('Settings', 'FontSize', 30);
 		HKFontSz := ReadInteger('Settings', 'HKFontSize', 15);
-		HKPos := ReadString('Settings', 'HKPosition', 'Down');
-		if (HKPos <> 'Down') and (HKPos <> 'Right') then HKPos := 'Down';
 		WndPos := ReadString('Settings', 'WindowPosition', 'Right');
 		if (WndPos <> 'Left') and (WndPos <> 'Right') and (WndPos <> 'Manual') then WndPos := 'Right';
 		TargetWndName := ReadString('Settings', 'TargetWindowName', '');
 		clList := StringToColor(ReadString('Colors', 'List', 'clWhite'));
 		clSelected := StringToColor(ReadString('Colors', 'Selected', 'clLime'));
 		clText := StringToColor(ReadString('Colors', 'Text', 'clBlack'));
-		clHKTeam := StringToColor(ReadString('Colors', 'HKTeam', 'clOlive'));
-		clHKGlobal := StringToColor(ReadString('Colors', 'HKGlobal', 'clGreen'));
+		clHotkey := StringToColor(ReadString('Colors', 'Hotkey', 'clOlive'));
 		clSeparator := StringToColor(ReadString('Colors', 'Separator', 'clBlack'));
 	finally
 		Free;
@@ -276,15 +253,15 @@ begin
 	end;
 end;
 
-procedure TMainForm.SendCommand(const Number: Byte; const IsTeamChat: Boolean);
+procedure TMainForm.SendCommand(const Number: Byte);
 var
 	IsWindowFound: Boolean;
 	CurrKbdLayout: HKL;
 
 	procedure ClickKey(Key: Word);
 	begin
-		keybd_event(Key, MapVirtualKey(Key, 0), 0, 0);
-		keybd_event(Key, MapVirtualKey(Key, 0), KEYEVENTF_KEYUP, 0);
+		keybd_event(Key, 0, 0, 0);
+		keybd_event(Key, 0, KEYEVENTF_KEYUP, 0);
 	end;
 
 begin
@@ -297,12 +274,12 @@ begin
 	else IsWindowFound := hActiveWnd > 0;
 	SetForegroundWindow(hActiveWnd);
 	if IsWindowFound then begin
-		Sleep(300);
-		if IsTeamChat then ClickKey(Ord('T')) else ClickKey(VK_RETURN);
-		Sleep(300);
-		keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0); // Press Ctrl
+		{if InsertMode = 'AnyChat' then} ClickKey(VK_RETURN);
+		Sleep(100);
+		keybd_event(VK_CONTROL, 0, 0, 0); // Press Ctrl
 		ClickKey(Ord('V'));
-		keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0); // Release Ctrl
+		keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0); // Release Ctrl
+		Sleep(100);
 		if not Commands[Number].IsDelay then ClickKey(VK_RETURN);
 	end;
 end;
@@ -328,19 +305,8 @@ begin
 	case Msg.Msg of
 		WM_ENTERSIZEMOVE: tmrMouseLeave.Enabled := False;
 		WM_EXITSIZEMOVE: tmrMouseLeave.Enabled := True;
-		WM_HOTKEY: begin
-			for I := 0 to Commands.Count - 1 do
-				if Msg.wParam = Commands[I].hkTeam.Atom then begin
-					Tag := I;
-					IsTeamHotkey := True;
-					Break;
-				end else if Msg.wParam = Commands[I].hkGlobal.Atom then begin
-					Tag := I;
-					IsTeamHotkey := False;
-					Break;
-				end;
-			tmrTargetWndActivate.Enabled := Tag >= 0;
-		end;
+		WM_HOTKEY: for I := 0 to Commands.Count - 1 do
+			if Msg.wParam = Commands[I].HotKey.Atom then Tag := I;
 		WM_MOVE: if not IsChangeForm then begin
 			IsChangeForm := True;
 			if Left = 0 then WndPos := 'Left' else
