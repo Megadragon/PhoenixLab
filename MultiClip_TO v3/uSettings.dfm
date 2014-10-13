@@ -2143,7 +2143,7 @@ object frmSettings: TfrmSettings
     Top = 8
     Width = 225
     Height = 225
-    ActivePage = tbsList
+    ActivePage = tbsForm
     HotTrack = True
     TabOrder = 0
     object tbsForm: TTabSheet
@@ -2179,6 +2179,13 @@ object frmSettings: TfrmSettings
         Height = 13
         Caption = #1055#1086#1079#1080#1094#1080#1103' '#1086#1082#1085#1072
       end
+      object lblTargetWnd: TLabel
+        Left = 8
+        Top = 152
+        Width = 131
+        Height = 13
+        Caption = #1047#1072#1075#1086#1083#1086#1074#1086#1082' '#1094#1077#1083#1077#1074#1086#1075#1086' '#1086#1082#1085#1072
+      end
       object speWidthMin: TSpinEdit
         Left = 152
         Top = 8
@@ -2199,17 +2206,6 @@ object frmSettings: TfrmSettings
         MinValue = 0
         TabOrder = 1
         Value = 1000
-      end
-      object lbeTargetWnd: TLabeledEdit
-        Left = 8
-        Top = 168
-        Width = 201
-        Height = 21
-        Anchors = [akLeft, akTop, akRight]
-        EditLabel.Width = 131
-        EditLabel.Height = 13
-        EditLabel.Caption = #1047#1072#1075#1086#1083#1086#1074#1086#1082' '#1094#1077#1083#1077#1074#1086#1075#1086' '#1086#1082#1085#1072
-        TabOrder = 4
       end
       object cbbWndPos: TComboBox
         Left = 88
@@ -2235,6 +2231,23 @@ object frmSettings: TfrmSettings
         MinValue = 0
         TabOrder = 2
         Value = 160
+      end
+      object cbbTargetWnd: TComboBox
+        Left = 8
+        Top = 168
+        Width = 201
+        Height = 21
+        AutoDropDown = True
+        AutoCloseUp = True
+        Anchors = [akLeft, akTop, akRight]
+        ItemHeight = 13
+        TabOrder = 4
+        Items.Strings = (
+          'Tanki Online - Avant Browser'
+          'Tanki Online - Google Chrome'
+          'Tanki Online - Internet Explorer'
+          'Tanki Online - Mozilla Firefox'
+          'Tanki Online - Opera')
       end
     end
     object tbsList: TTabSheet

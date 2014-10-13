@@ -2,8 +2,6 @@ unit uCommandList;
 
 interface
 
-uses Contnrs;
-
 type
 	THotKey = record
 		Atom: Word;
@@ -13,29 +11,24 @@ type
 		AsString: string;
 	end;
 
-	TCommand = class
-	private
-		FIsDelay: Boolean;
-		FText: string;
-		FHotKey: THotKey;
-	public
-		constructor Create(ASource: string; const AIndex: Byte);
-		destructor Destroy; override;
-		procedure RegHotKey;
-		procedure UnregHotKey;
-		property IsDelay: Boolean read FIsDelay;
-		property Text: string read FText;
-		property HotKey: THotKey read FHotKey;
+	TCommand = record
+		IsDelay: Boolean;
+		Text: string;
+		HotKey: THotKey;
 	end;
 
-	TCommandList = class(TObjectList)
+	TCommandList = class
 	private
+		FList: array of TCommand;
+		function GetCount: Byte;
 		function GetItem(Index: Byte): TCommand;
 	public
 		constructor Create(const AFilename: string);
+		destructor Destroy; override;
 		procedure LoadFromFile(const AFilename: string);
 		procedure RegHK;
 		procedure UnregHK;
+		property Count: Byte read GetCount;
 		property List[Index: Byte]: TCommand read GetItem; default;
 	end;
 
@@ -45,100 +38,94 @@ var
 
 implementation
 
-uses Windows, SysUtils, Classes, Menus;
-
-{ TCommand }
-
-constructor TCommand.Create(ASource: string; const AIndex: Byte);
-var
-	TabPos: Byte;
-	Shortcut: TShortCut;
-begin
-	if ASource = '' then Exit else begin
-		FIsDelay := ASource[1] = '%';
-		if IsDelay then Delete(ASource, 1, 1);
-		TabPos := Pos(#9, ASource);
-		if TabPos = 0 then FText := ASource else begin
-			FText := Copy(ASource, 1, TabPos - 1);
-			Delete(ASource, 1, TabPos);
-			with HotKey do begin
-				AsString := ASource;
-				Shortcut := TextToShortCut(AsString);
-				if Shortcut > 0 then begin
-					Atom := GlobalAddAtom(PChar('Multiclip_Chat_' + IntToStr(AIndex)));
-					Modifiers := 0;
-					if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
-					if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
-					if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
-					VirtualCode := Shortcut;
-				end;
-			end;
-		end;
-	end;
-end;
-
-destructor TCommand.Destroy;
-begin
-	with HotKey do if Atom > 0 then begin
-		UnregHotKey;
-		GlobalDeleteAtom(Atom);
-	end;
-end;
-
-procedure TCommand.RegHotKey;
-begin
-	with FHotKey do if Atom > 0 then
-		IsRegister := RegisterHotKey(hOwner, Atom, Modifiers, VirtualCode);
-end;
-
-procedure TCommand.UnregHotKey;
-begin
-	with HotKey do if (Atom > 0) and IsRegister then
-		UnregisterHotKey(hOwner, Atom);
-end;
+uses Windows, SysUtils, Menus;
 
 { TCommandList }
 
 constructor TCommandList.Create(const AFilename: string);
 begin
-	inherited;
-	LoadFromFile(AFilename);
+	if FileExists(AFilename) then LoadFromFile(AFilename);
 	RegHK;
+end;
+
+destructor TCommandList.Destroy;
+var
+	I: Byte;
+begin
+	UnregHK;
+	for I := 0 to Count - 1 do with Self[I].HotKey do
+		if Atom > 0 then GlobalDeleteAtom(Atom);
+	SetLength(FList, 0);
+end;
+
+function TCommandList.GetCount: Byte;
+begin
+	Result := Length(FList);
 end;
 
 function TCommandList.GetItem(Index: Byte): TCommand;
 begin
-	if Index < Count then Result := Items[Index] as TCommand else Result := nil;
+	if Index < Count then Result := FList[Index];
 end;
 
 procedure TCommandList.LoadFromFile(const AFilename: string);
+const // import from Classes.pas
+	scShift = $2000;
+	scCtrl = $4000;
+	scAlt = $8000;
+	scNone = 0;
 var
 	CmdList: TextFile;
 	Buffer: string;
+	TabPos: Byte;
+	Shortcut: Word;
 begin
-	if FileExists(AFilename) then begin
-		AssignFile(CmdList, AFilename);
-		Reset(CmdList);
-		while not Eof(CmdList) do begin
-			ReadLn(CmdList, Buffer);
-			Add(TCommand.Create(Buffer, Count));
+	AssignFile(CmdList, AFilename);
+	Reset(CmdList);
+	while not Eof(CmdList) do begin
+		ReadLn(CmdList, Buffer);
+		SetLength(FList, Count + 1);
+		if Buffer > '' then with FList[Count - 1] do begin
+			IsDelay := Buffer[1] = '%';
+			if IsDelay then Delete(Buffer, 1, 1);
+			TabPos := Pos(#9, Buffer);
+			if TabPos = 0 then Text := Buffer else begin
+				Text := Copy(Buffer, 1, TabPos - 1);
+				Delete(Buffer, 1, TabPos);
+				with HotKey do begin
+					AsString := Buffer;
+					Shortcut := TextToShortCut(AsString);
+					if Shortcut > 0 then begin
+						Atom := GlobalAddAtom(PChar('Multiclip_Chat_' + IntToStr(Count - 1)));
+						if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
+						if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
+						if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
+						VirtualCode := Shortcut;
+					end else begin
+						Atom := 0;
+						IsRegister := False;
+					end;
+				end;
+			end;
 		end;
-		CloseFile(CmdList);
 	end;
+	CloseFile(CmdList);
 end;
 
 procedure TCommandList.RegHK;
 var
 	I: Byte;
 begin
-	for I := 0 to Count - 1 do Self[I].RegHotKey;
+	for I := 0 to Count - 1 do with Self[I].HotKey do if Atom > 0 then
+		FList[I].HotKey.IsRegister := RegisterHotKey(hOwner, Atom, Modifiers, VirtualCode);
 end;
 
 procedure TCommandList.UnregHK;
 var
 	I: Byte;
 begin
-	for I := 0 to Count - 1 do Self[I].UnregHotKey;
+	for I := 0 to Count - 1 do with Self[I].HotKey do
+		if (Atom > 0) and IsRegister then UnregisterHotKey(hOwner, Atom);
 end;
 
 end.

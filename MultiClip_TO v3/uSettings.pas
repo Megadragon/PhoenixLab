@@ -18,7 +18,8 @@ type
 		speAlpha: TSpinEdit;
 		speDelay: TSpinEdit;
 		cbbWndPos: TComboBox;
-		lbeTargetWnd: TLabeledEdit;
+		lblTargetWnd: TLabel;
+		cbbTargetWnd: TComboBox;
 		tbsList: TTabSheet;
 		lblFontSz: TLabel;
 		lblHKFontSz: TLabel;
@@ -57,7 +58,7 @@ begin
 		speAlpha.Value := ReadInteger('Settings', 'AlphaBlendValue', speAlpha.Value);
 		speDelay.Value := ReadInteger('Settings', 'DelayBeforeMinimize', speDelay.Value);
 		cbbWndPos.Text := ReadString('Settings', 'WindowPosition', cbbWndPos.Text);
-		lbeTargetWnd.Text := ReadString('Settings', 'TargetWindowName', lbeTargetWnd.Text);
+		cbbTargetWnd.Text := ReadString('Settings', 'TargetWindowName', cbbTargetWnd.Text);
 		speFontSz.Value := ReadInteger('Settings', 'FontSize', speFontSz.Value);
 		speHKFontSz.Value := ReadInteger('Settings', 'HKFontSize', speHKFontSz.Value);
 		crbList.Selected := StringToColor(ReadString('Colors', 'List', ColorToString(crbList.Selected)));
@@ -88,7 +89,7 @@ begin
 		WriteInteger('Settings', 'AlphaBlendValue', speAlpha.Value);
 		WriteInteger('Settings', 'DelayBeforeMinimize', speDelay.Value);
 		WriteString('Settings', 'WindowPosition', cbbWndPos.Text);
-		WriteString('Settings', 'TargetWindowName', lbeTargetWnd.Text);
+		WriteString('Settings', 'TargetWindowName', cbbTargetWnd.Text);
 		WriteInteger('Settings', 'FontSize', speFontSz.Value);
 		WriteInteger('Settings', 'HKFontSize', speHKFontSz.Value);
 		WriteString('Colors', 'List', ColorToString(crbList.Selected));

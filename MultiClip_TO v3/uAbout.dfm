@@ -2174,7 +2174,7 @@ object AboutBox: TAboutBox
       Top = 32
       Width = 104
       Height = 19
-      Caption = #1042#1077#1088#1089#1080#1103' 3.1.0.52'
+      Caption = #1042#1077#1088#1089#1080#1103' 3.1.2.54'
       IsControl = True
     end
     object Copyright: TLabel
@@ -2190,18 +2190,14 @@ object AboutBox: TAboutBox
       Top = 96
       Width = 132
       Height = 15
-      Cursor = crHandPoint
       Caption = #1040#1074#1090#1086#1088': '#1040#1085#1090#1086#1085' '#1053#1080#1082#1086#1083#1072#1077#1074
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlue
+      Font.Color = clWindowText
       Font.Height = -13
       Font.Name = 'Times New Roman'
-      Font.Style = [fsUnderline]
+      Font.Style = []
       ParentFont = False
       WordWrap = True
-      OnClick = CommentsClick
-      OnMouseEnter = CommentsMouseEnter
-      OnMouseLeave = CommentsMouseLeave
       IsControl = True
     end
     object Remarks: TLabel

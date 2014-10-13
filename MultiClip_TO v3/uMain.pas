@@ -38,7 +38,7 @@ type
 		procedure LoadFromIni;
 		procedure Restore;
 		procedure SaveToIni;
-		procedure SendCommand(const Number: Byte);
+		procedure SendCommand(const Index: Byte);
 		procedure Shrink;
 		procedure WndProc(var Msg: TMessage); override;
 	end;
@@ -55,8 +55,7 @@ var
 	clHotkey: TColor;
 
 	hActiveWnd: THandle;
-	TargetWndName: string;
-	WndPos: string;
+	TargetWndName, WndPos: string;
 
 implementation
 
@@ -198,12 +197,12 @@ begin
 		lsbCommands.Items.Add(Commands[I].Text);
 	lsbCommands.Items.EndUpdate;
 	ClientHeight := lsbCommands.ItemRect(lsbCommands.Count - 1).Bottom;
-	if Height > Screen.Height then Height := Screen.Height;
+	if Height > Screen.WorkAreaHeight then Height := Screen.WorkAreaHeight;
 end;
 
 procedure TMainForm.LoadFromIni;
 begin
-	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
+	with TIniFile.Create(GetCurrentDir + '\multiclip.ini') do try
 		Left := ReadInteger('Settings', 'Left', Left);
 		Top := ReadInteger('Settings', 'Top', Top);
 		WidthMin := ReadInteger('Settings', 'WidthMin', 132);
@@ -243,7 +242,7 @@ end;
 
 procedure TMainForm.SaveToIni;
 begin
-	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
+	with TIniFile.Create(GetCurrentDir + '\multiclip.ini') do try
 		WriteInteger('Settings', 'Left', Left);
 		WriteInteger('Settings', 'Top', Top);
 		WriteInteger('Settings', 'WidthMax', WidthMax);
@@ -253,7 +252,7 @@ begin
 	end;
 end;
 
-procedure TMainForm.SendCommand(const Number: Byte);
+procedure TMainForm.SendCommand(const Index: Byte);
 var
 	IsWindowFound: Boolean;
 	CurrKbdLayout: HKL;
@@ -267,20 +266,19 @@ var
 begin
 	CurrKbdLayout := GetKeyboardLayout(0);
 	ActivateKeyboardLayout($0419, KLF_ACTIVATE);
-	Clipboard.AsText := Commands[Number].Text;
+	Clipboard.AsText := Commands[Index].Text;
 	ActivateKeyboardLayout(CurrKbdLayout, KLF_ACTIVATE);
-	if TargetWndName > '' then
-		IsWindowFound := hActiveWnd = FindWindow(nil, @TargetWndName)
-	else IsWindowFound := hActiveWnd > 0;
+	if TargetWndName = '' then IsWindowFound := hActiveWnd > 0
+	else IsWindowFound := hActiveWnd = FindWindow(nil, PChar(TargetWndName));
 	SetForegroundWindow(hActiveWnd);
 	if IsWindowFound then begin
-		{if InsertMode = 'AnyChat' then} ClickKey(VK_RETURN);
+		ClickKey(VK_RETURN);
 		Sleep(100);
 		keybd_event(VK_CONTROL, 0, 0, 0); // Press Ctrl
 		ClickKey(Ord('V'));
 		keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0); // Release Ctrl
 		Sleep(100);
-		if not Commands[Number].IsDelay then ClickKey(VK_RETURN);
+		if not Commands[Index].IsDelay then ClickKey(VK_RETURN);
 	end;
 end;
 
