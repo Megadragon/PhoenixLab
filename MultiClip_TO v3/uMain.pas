@@ -21,7 +21,6 @@ type
 		procedure FormCreate(Sender: TObject);
 		procedure FormDestroy(Sender: TObject);
 		procedure FormResize(Sender: TObject);
-		procedure lsbCommandsClick(Sender: TObject);
 		procedure lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 			Rect: TRect; State: TOwnerDrawState);
 		procedure lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
@@ -100,14 +99,6 @@ begin
 	lsbCommands.Repaint;
 end;
 
-procedure TMainForm.lsbCommandsClick(Sender: TObject);
-begin
-	with lsbCommands do if Items[ItemIndex] > '' then begin
-		SendCommand(ItemIndex);
-		if not IsHidden then Shrink;
-	end;
-end;
-
 procedure TMainForm.lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 	Rect: TRect; State: TOwnerDrawState);
 var
@@ -180,10 +171,7 @@ begin
 	H := GetForegroundWindow;
 	if H <> Handle then hActiveWnd := H;
 	if (Tag >= 0) and (GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0)
-	then begin
-		SendCommand(Tag);
-		Tag := -1;
-	end;
+	then SendCommand(Tag);
 end;
 
 { Public procedures }
@@ -264,8 +252,7 @@ var
 	end;
 
 begin
-	CurrKbdLayout := GetKeyboardLayout(0);
-	ActivateKeyboardLayout($0419, KLF_ACTIVATE);
+	CurrKbdLayout := ActivateKeyboardLayout($0419, KLF_ACTIVATE);
 	Clipboard.AsText := Commands[Index].Text;
 	ActivateKeyboardLayout(CurrKbdLayout, KLF_ACTIVATE);
 	if TargetWndName = '' then IsWindowFound := hActiveWnd > 0
@@ -280,6 +267,7 @@ begin
 		Sleep(100);
 		if not Commands[Index].IsDelay then ClickKey(VK_RETURN);
 	end;
+	Tag := -1;
 end;
 
 procedure TMainForm.Shrink;

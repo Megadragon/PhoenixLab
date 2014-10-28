@@ -78,7 +78,6 @@ object MainForm: TMainForm
     ItemHeight = 30
     ParentFont = False
     TabOrder = 0
-    OnClick = lsbCommandsClick
     OnDrawItem = lsbCommandsDrawItem
     OnMeasureItem = lsbCommandsMeasureItem
     OnMouseMove = lsbCommandsMouseMove
