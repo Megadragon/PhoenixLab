@@ -1,11 +1,11 @@
 object AboutBox: TAboutBox
   Left = 682
   Top = 337
-  BorderIcons = []
+  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsDialog
   Caption = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
-  ClientHeight = 248
-  ClientWidth = 412
+  ClientHeight = 241
+  ClientWidth = 409
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -4199,6 +4199,7 @@ object AboutBox: TAboutBox
         FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
         FF00}
       Stretch = True
+      Transparent = True
       IsControl = True
     end
     object Comments: TLabel
@@ -4218,7 +4219,7 @@ object AboutBox: TAboutBox
       Top = 84
       Width = 176
       Height = 13
-      Caption = 'Copyright '#169' Megadragon, 2011-2013'
+      Caption = 'Copyright '#169' Megadragon, 2011-2014'
       IsControl = True
     end
     object Feedback: TLabel
@@ -4246,7 +4247,7 @@ object AboutBox: TAboutBox
       Top = 68
       Width = 144
       Height = 13
-      Caption = #1042#1077#1088#1089#1080#1103' '#1087#1088#1086#1075#1088#1072#1084#1084#1099': 2.6.1.42'
+      Caption = #1042#1077#1088#1089#1080#1103' '#1087#1088#1086#1075#1088#1072#1084#1084#1099': 2.7.0.43'
       IsControl = True
     end
     object EMail: TLabel
@@ -4268,8 +4269,8 @@ object AboutBox: TAboutBox
     end
   end
   object OKButton: TButton
-    Left = 176
-    Top = 212
+    Left = 168
+    Top = 208
     Width = 73
     Height = 25
     Cursor = crHandPoint

@@ -13,11 +13,9 @@ begin
 		Show;
 		Update;
 		with pgbLoadStatus do
-			if GetDriveType(PChar(Copy(Application.ExeName, 1, 3))) <> 2 then
+			if GetDriveType(PChar(Copy(GetCurrentDir, 1, 3))) <> 2 then
 				MessageBox(0, 'Запуск программы WormSlayer не на съёмном носителе потенциально опасен!', 'WormSlayer', MB_ICONSTOP)
 			else begin
-				StepBy(Step);
-				Application.Initialize;
 				StepBy(Step);
 				Application.Title := 'WormSlayer – Истребитель червей';
 				StepBy(Step);

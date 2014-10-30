@@ -30,7 +30,7 @@ implementation
 
 procedure TAboutBox.EMailMouseEnter(Sender: TObject);
 begin
-	with EMail.Font do if Color <> clPurple then begin
+	with EMail.Font do begin
 		Color := clRed;
 		Style := [];
 	end;
@@ -38,7 +38,7 @@ end;
 
 procedure TAboutBox.EMailMouseLeave(Sender: TObject);
 begin
-	with EMail.Font do if Color <> clPurple then begin
+	with EMail.Font do begin
 		Color := clBlue;
 		Style := [fsUnderline];
 	end;
@@ -46,8 +46,7 @@ end;
 
 procedure TAboutBox.EMailClick(Sender: TObject);
 begin
-	EMail.Font.Color := clPurple;
-	ShellExecute(Handle, 'open', 'mailto:Glossit@2upost.com?subject=WormSlayer v2.6.1.42', '', '', SW_SHOW);
+	ShellExecute(Handle, 'open', 'mailto:Glossit@2upost.com?subject=WormSlayer v2.7.0.43', '', '', SW_SHOW);
 end;
 
 end.
