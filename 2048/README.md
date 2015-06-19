@@ -20,4 +20,4 @@ This is a ported version of [2048](https://github.com/gabrielecirulli/2048) on W
 * add installation pack.
 
 ## License
-2048 for Windows is licensed under the [CNU GPL v3](https://github.com/Megadragon/PhoenixLab/blob/master/LICENSE).
+2048 for Windows is licensed under the [GNU GPL v3](https://github.com/Megadragon/PhoenixLab/blob/master/LICENSE).
