@@ -2174,7 +2174,7 @@ object AboutBox: TAboutBox
       Top = 32
       Width = 104
       Height = 19
-      Caption = #1042#1077#1088#1089#1080#1103' 3.1.3.55'
+      Caption = #1042#1077#1088#1089#1080#1103' 3.2.0.56'
       IsControl = True
     end
     object Copyright: TLabel
@@ -2182,7 +2182,7 @@ object AboutBox: TAboutBox
       Top = 64
       Width = 134
       Height = 19
-      Caption = 'Copyright '#169' 2009-14'
+      Caption = 'Copyright '#169' 2009-15'
       IsControl = True
     end
     object Comments: TLabel

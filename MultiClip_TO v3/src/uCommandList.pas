@@ -40,6 +40,8 @@ implementation
 
 uses Windows, SysUtils, Menus;
 
+const sHotKeyPrefix = 'Multiclip_Chat_';
+
 { TCommandList }
 
 constructor TCommandList.Create(const AFilename: string);
@@ -96,7 +98,7 @@ begin
 					AsString := Buffer;
 					Shortcut := TextToShortCut(AsString);
 					if Shortcut > 0 then begin
-						Atom := GlobalAddAtom(PChar('Multiclip_Chat_' + IntToStr(Count - 1)));
+						Atom := GlobalAddAtom(PChar(sHotKeyPrefix + IntToStr(Count - 1)));
 						if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
 						if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
 						if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
@@ -129,3 +131,4 @@ begin
 end;
 
 end.
+

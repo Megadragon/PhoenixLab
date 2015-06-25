@@ -21,6 +21,7 @@ type
 		procedure FormCreate(Sender: TObject);
 		procedure FormDestroy(Sender: TObject);
 		procedure FormResize(Sender: TObject);
+		procedure lsbCommandsClick(Sender: TObject);
 		procedure lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 			Rect: TRect; State: TOwnerDrawState);
 		procedure lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
@@ -33,6 +34,7 @@ type
 		procedure tmrMouseLeaveTimer(Sender: TObject);
 		procedure tmrTargetWndActivateTimer(Sender: TObject);
 	public
+		function GetApplicationPath: string;
 		procedure LoadCommands;
 		procedure LoadFromIni;
 		procedure Restore;
@@ -45,6 +47,15 @@ type
 var
 	MainForm: TMainForm;
 
+implementation
+
+uses Clipbrd, IniFiles, uAbout, uCommandList;
+
+const
+	sCommandFileName = 'command.lst';
+	sSettingsFileName = 'Multiclip.ini';
+
+var
 	WidthMin, WidthMax: Word;
 	IsHidden, IsChangeForm: Boolean;
 	FontSz, HKFontSz: Byte;
@@ -55,10 +66,6 @@ var
 
 	hActiveWnd: THandle;
 	TargetWndName, WndPos: string;
-
-implementation
-
-uses Clipbrd, IniFiles, uAbout, uCommandList;
 
 {$R *.dfm}
 
@@ -83,7 +90,7 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
 	hOwner := Handle;
-	Commands := TCommandList.Create(GetCurrentDir + '\command.lst');
+	Commands := TCommandList.Create(GetApplicationPath + sCommandFileName);
 	LoadFromIni;
 	LoadCommands;
 	Restore;
@@ -96,7 +103,15 @@ end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-	lsbCommands.Repaint;
+	lsbCommands.Refresh;
+end;
+
+procedure TMainForm.lsbCommandsClick(Sender: TObject);
+begin
+	with lsbCommands do if Items[ItemIndex] > '' then begin
+		SendCommand(ItemIndex);
+		if not IsHidden then Shrink;
+	end;
 end;
 
 procedure TMainForm.lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
@@ -176,13 +191,17 @@ end;
 
 { Public procedures }
 
+function TMainForm.GetApplicationPath: string;
+begin
+	Result := ExtractFilePath(Application.ExeName);
+end;
+
 procedure TMainForm.LoadCommands;
 var
 	I: Byte;
 begin
 	lsbCommands.Items.BeginUpdate;
-	for I := 0 to Commands.Count - 1 do
-		lsbCommands.Items.Add(Commands[I].Text);
+	for I := 0 to Commands.Count - 1 do lsbCommands.Items.Add(Commands[I].Text);
 	lsbCommands.Items.EndUpdate;
 	ClientHeight := lsbCommands.ItemRect(lsbCommands.Count - 1).Bottom;
 	if Height > Screen.WorkAreaHeight then Height := Screen.WorkAreaHeight;
@@ -190,7 +209,7 @@ end;
 
 procedure TMainForm.LoadFromIni;
 begin
-	with TIniFile.Create(GetCurrentDir + '\multiclip.ini') do try
+	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
 		Left := ReadInteger('Settings', 'Left', Left);
 		Top := ReadInteger('Settings', 'Top', Top);
 		WidthMin := ReadInteger('Settings', 'WidthMin', 132);
@@ -230,7 +249,7 @@ end;
 
 procedure TMainForm.SaveToIni;
 begin
-	with TIniFile.Create(GetCurrentDir + '\multiclip.ini') do try
+	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
 		WriteInteger('Settings', 'Left', Left);
 		WriteInteger('Settings', 'Top', Top);
 		WriteInteger('Settings', 'WidthMax', WidthMax);
@@ -320,3 +339,4 @@ initialization
 	IsChangeForm := True;
 
 end.
+

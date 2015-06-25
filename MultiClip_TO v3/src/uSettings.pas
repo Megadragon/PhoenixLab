@@ -42,6 +42,8 @@ type
 		procedure ColorBoxSelect(Sender: TObject);
 		procedure bbnOKClick(Sender: TObject);
 		procedure bbnCancelClick(Sender: TObject);
+	private
+		function GetApplicationPath: string;
 	end;
 
 var
@@ -49,11 +51,14 @@ var
 
 implementation
 
+const
+	sSettingsFileName = 'Multiclip.ini';
+
 {$R *.dfm}
 
 procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
-	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
+	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
 		speWidthMin.Value := ReadInteger('Settings', 'WidthMin', speWidthMin.Value);
 		speAlpha.Value := ReadInteger('Settings', 'AlphaBlendValue', speAlpha.Value);
 		speDelay.Value := ReadInteger('Settings', 'DelayBeforeMinimize', speDelay.Value);
@@ -71,20 +76,20 @@ begin
 	end;
 end;
 
-procedure TfrmSettings.bbnCancelClick(Sender: TObject);
-begin
-	Close;
-end;
-
 procedure TfrmSettings.ColorBoxSelect(Sender: TObject);
 begin
 	if Sender is TColorBox then with (Sender as TColorBox) do
 		if Selected = clRed then Selected := DefaultColorColor;
 end;
 
+procedure TfrmSettings.bbnCancelClick(Sender: TObject);
+begin
+	Close;
+end;
+
 procedure TfrmSettings.bbnOKClick(Sender: TObject);
 begin
-	with TIniFile.Create(GetCurrentDir + '\Multiclip.ini') do try
+	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
 		WriteInteger('Settings', 'WidthMin', speWidthMin.Value);
 		WriteInteger('Settings', 'AlphaBlendValue', speAlpha.Value);
 		WriteInteger('Settings', 'DelayBeforeMinimize', speDelay.Value);
@@ -103,4 +108,10 @@ begin
 	Close;
 end;
 
+function TfrmSettings.GetApplicationPath: string;
+begin
+	Result := ExtractFilePath(Application.ExeName);
+end;
+
 end.
+

@@ -26,7 +26,8 @@ type
 		procedure btnAddCommandClick(Sender: TObject);
 		procedure btnSeparatorClick(Sender: TObject);
 		procedure btnDeleteClick(Sender: TObject);
-	public
+	private
+		function GetApplicationPath: string;
 		procedure LoadFromFile(const Filename: string);
 		procedure SaveToFile(const Filename: string);
 	end;
@@ -36,21 +37,29 @@ var
 
 implementation
 
+const
+	sAddDoubleSeparator = 'Двойной разделитель не имеет смысла.';
+	sAddEmptyString = 'Добавление пустой команды не имеет смысла.';
+	sAddSeparatorToBeginning = 'Разделитель в начале списка не имеет смысла.';
+	sCommandFileName = 'command.lst';
+	sFileNotFound = 'Файл списка команд command.lst не найден.';
+	sProgramName = 'Редактор быстрых команд';
+
 {$R *.dfm}
 
 procedure TfrmCommands.FormCreate(Sender: TObject);
 begin
-	if FileExists(GetCurrentDir + '\command.lst') then
-		LoadFromFile(GetCurrentDir + '\command.lst')
+	if FileExists(GetApplicationPath + sCommandFileName) then
+		LoadFromFile(GetApplicationPath + sCommandFileName)
 	else begin
-		MessageBox(Handle, 'Файл списка команд command.lst не найден.', 'Редактор быстрых команд', MB_OK or MB_ICONSTOP or MB_SYSTEMMODAL);
+		MessageBox(Handle, sFileNotFound, sProgramName, MB_OK or MB_ICONSTOP or MB_SYSTEMMODAL);
 		Application.Terminate;
 	end;
 end;
 
 procedure TfrmCommands.bbnOKClick(Sender: TObject);
 begin
-	SaveToFile(GetCurrentDir + '\command.lst');
+	SaveToFile(GetApplicationPath + sCommandFileName);
 	Close;
 end;
 
@@ -61,10 +70,9 @@ end;
 
 procedure TfrmCommands.btnAddCommandClick(Sender: TObject);
 begin
-	if lbeText.Text = '' then begin
-		MessageBox(Handle, 'Добавление пустой команды не имеет смысла.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING);
-		Exit;
-	end else with ltvCommandList.Items.Insert(ltvCommandList.ItemIndex) do begin
+	if lbeText.Text = '' then
+		MessageBox(Handle, sAddEmptyString, sProgramName, MB_OK or MB_ICONWARNING)
+	else with ltvCommandList.Items.Insert(ltvCommandList.ItemIndex) do begin
 		Caption := lbeText.Text;
 		Checked := chbDelay.Checked;
 		SubItems.Add(ShortCutToText(htkHotkey.HotKey));
@@ -77,15 +85,20 @@ end;
 procedure TfrmCommands.btnSeparatorClick(Sender: TObject);
 begin
 	if ltvCommandList.ItemIndex > 0 then
-		if (ltvCommandList.Selected.Caption = '')
-		then MessageBox(Handle, 'Двойной разделитель не имеет смысла.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING)
+		if ltvCommandList.Selected.Caption = '' then
+			MessageBox(Handle, sAddDoubleSeparator, sProgramName, MB_OK or MB_ICONWARNING)
 		else ltvCommandList.Items.Insert(ltvCommandList.ItemIndex).Caption := ''
-	else MessageBox(Handle, 'Разделитель в начале списка не имеет смысла.', 'Редактор быстрых команд', MB_OK or MB_ICONWARNING);
+	else MessageBox(Handle, sAddSeparatorToBeginning, sProgramName, MB_OK or MB_ICONWARNING);
 end;
 
 procedure TfrmCommands.btnDeleteClick(Sender: TObject);
 begin
 	ltvCommandList.DeleteSelected;
+end;
+
+function TfrmCommands.GetApplicationPath: string;
+begin
+	Result := ExtractFilePath(Application.ExeName);
 end;
 
 procedure TfrmCommands.LoadFromFile(const Filename: string);
@@ -132,3 +145,4 @@ begin
 end;
 
 end.
+
