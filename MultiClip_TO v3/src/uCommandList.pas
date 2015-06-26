@@ -102,7 +102,7 @@ begin
 						if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
 						if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
 						if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
-						VirtualCode := Shortcut;
+						VirtualCode := Byte(Shortcut);
 					end else begin
 						Atom := 0;
 						IsRegister := False;
