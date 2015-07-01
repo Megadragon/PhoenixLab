@@ -20,12 +20,17 @@ type
 		cbbLocale: TComboBox;
 		lblServer: TLabel;
 		cbbServer: TComboBox;
+		procedure FormClose(Sender: TObject; var Action: TCloseAction);
 		procedure FormCreate(Sender: TObject);
 		procedure shpRunMouseUp(Sender: TObject; Button: TMouseButton;
 			Shift: TShiftState; X, Y: Integer);
 		procedure shpCloseMouseUp(Sender: TObject; Button: TMouseButton;
 			Shift: TShiftState; X, Y: Integer);
 		procedure cbbLocaleChange(Sender: TObject);
+	private
+		function GetApplicationPath: string;
+		procedure LoadFromIni;
+		procedure SaveToIni;
 	public
 		BrowsersList: array of string;
 		procedure ScanBrowsers;
@@ -36,13 +41,52 @@ var
 
 implementation
 
-uses Registry, ShellAPI;
+uses Registry, ShellAPI, IniFiles;
+
+const
+	IniFileName = 'TO_Launcher.ini';
 
 {$R *.dfm}
+
+function TfrmMain.GetApplicationPath: string;
+begin
+	Result := ExtractFilePath(Application.ExeName);
+end;
+
+procedure TfrmMain.LoadFromIni;
+begin
+	with TIniFile.Create(GetApplicationPath + IniFileName) do try
+		cbbBrowser.ItemIndex := ReadInteger('Main', 'Browser', -1);
+		cbbLanguage.ItemIndex := ReadInteger('Main', 'Language', -1);
+		cbbLocale.ItemIndex := ReadInteger('Main', 'Locale', -1);
+		cbbLocaleChange(cbbLocale);
+		cbbServer.ItemIndex := ReadInteger('Main', 'Server', -1);
+	finally
+		Free;
+	end;
+end;
+
+procedure TfrmMain.SaveToIni;
+begin
+	with TIniFile.Create(GetApplicationPath + IniFileName) do try
+		WriteInteger('Main', 'Browser', cbbBrowser.ItemIndex);
+		WriteInteger('Main', 'Language', cbbLanguage.ItemIndex);
+		WriteInteger('Main', 'Locale', cbbLocale.ItemIndex);
+		WriteInteger('Main', 'Server', cbbServer.ItemIndex);
+	finally
+		Free;
+	end;
+end;
+
+procedure TfrmMain.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+	SaveToIni;
+end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
 	ScanBrowsers;
+	LoadFromIni;
 end;
 
 procedure TfrmMain.ScanBrowsers;
@@ -104,7 +148,7 @@ begin
 	end;
 	Param := 'http://tankionline.com/battle-' + Lang + '.html#/server='
 		+ Locale + IntToStr(cbbServer.ItemIndex + 1);
-	ShellExecute(0, 'open', PChar(App), PChar(Param), '', SW_SHOWMAXIMIZED);
+	ShellExecute(0, nil, PChar(App), PChar(Param), nil, SW_SHOWMAXIMIZED);
 	Close;
 end;
 
@@ -123,9 +167,9 @@ begin
 		try
 			Clear;
 			case cbbLocale.ItemIndex of
-				0: for I := 1 to 39 do Add('Сервер №' + IntToStr(I));
-				1: for I := 1 to 13 do Add('Сервер №' + IntToStr(I));
-				2: for I := 1 to 2 do Add('Сервер №' + IntToStr(I));
+				0: for I := 1 to 24 do Add('Сервер №' + IntToStr(I));
+				1: for I := 1 to 9 do Add('Сервер №' + IntToStr(I));
+				2: for I := 1 to 1 do Add('Сервер №' + IntToStr(I));
 			end;
 		finally
 			EndUpdate;
@@ -134,3 +178,4 @@ begin
 end;
 
 end.
+

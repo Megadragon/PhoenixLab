@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 615
-  Top = 276
+  Left = 626
+  Top = 292
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'TO Launcher'
@@ -16,6 +16,7 @@ object frmMain: TfrmMain
   OldCreateOrder = False
   Position = poScreenCenter
   ShowHint = True
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 19
@@ -25,7 +26,7 @@ object frmMain: TfrmMain
     Width = 177
     Height = 89
     Cursor = crHandPoint
-    Hint = #1042#1099#1093#1086#1076' '#1080#1079' '#1087#1088#1086#1075#1088#1072#1084#1084#1099
+    Hint = #1042#1099#1081#1090#1080' '#1080#1079' '#1087#1088#1086#1075#1088#1072#1084#1084#1099
     Brush.Color = clRed
     Shape = stRoundRect
     OnMouseUp = shpCloseMouseUp
@@ -81,6 +82,7 @@ object frmMain: TfrmMain
       Width = 54
       Height = 19
       Caption = #1041#1088#1072#1091#1079#1077#1088':'
+      FocusControl = cbbBrowser
     end
     object lblLanguage: TLabel
       Left = 16
@@ -88,6 +90,7 @@ object frmMain: TfrmMain
       Width = 38
       Height = 19
       Caption = #1071#1079#1099#1082':'
+      FocusControl = cbbLanguage
     end
     object lblLocale: TLabel
       Left = 16
@@ -95,6 +98,7 @@ object frmMain: TfrmMain
       Width = 51
       Height = 19
       Caption = #1051#1086#1082#1072#1083#1100':'
+      FocusControl = cbbLocale
     end
     object lblServer: TLabel
       Left = 16
@@ -102,12 +106,14 @@ object frmMain: TfrmMain
       Width = 52
       Height = 19
       Caption = #1057#1077#1088#1074#1077#1088':'
+      FocusControl = cbbServer
     end
     object cbbBrowser: TComboBox
       Left = 80
       Top = 24
       Width = 177
       Height = 27
+      Hint = #1042#1099#1073#1077#1088#1080#1090#1077' '#1073#1088#1072#1091#1079#1077#1088
       Style = csDropDownList
       Color = 12339
       ItemHeight = 19
@@ -118,6 +124,7 @@ object frmMain: TfrmMain
       Top = 64
       Width = 177
       Height = 27
+      Hint = #1042#1099#1073#1077#1088#1080#1090#1077' '#1103#1079#1099#1082' '#1080#1085#1090#1077#1088#1092#1077#1081#1089#1072
       Style = csDropDownList
       Color = 12339
       ItemHeight = 19
@@ -132,6 +139,7 @@ object frmMain: TfrmMain
       Top = 104
       Width = 177
       Height = 27
+      Hint = #1042#1099#1073#1077#1088#1080#1090#1077' '#1085#1072#1094#1080#1086#1085#1072#1083#1100#1085#1086#1089#1090#1100' '#1089#1077#1088#1074#1077#1088#1072
       Style = csDropDownList
       Color = 12339
       ItemHeight = 19
@@ -147,6 +155,7 @@ object frmMain: TfrmMain
       Top = 144
       Width = 177
       Height = 27
+      Hint = #1042#1099#1073#1077#1088#1080#1090#1077' '#1085#1086#1084#1077#1088' '#1089#1077#1088#1074#1077#1088#1072
       Style = csDropDownList
       Color = 12339
       ItemHeight = 19
