@@ -1,13 +1,11 @@
-object MainForm: TMainForm
+object frmMain: TfrmMain
   Left = 482
   Top = 278
-  AlphaBlend = True
+  Width = 600
+  Height = 366
   Anchors = []
-  BorderIcons = [biSystemMenu]
-  BorderStyle = bsSingle
+  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'WormSlayer '#8211' '#1048#1089#1090#1088#1077#1073#1080#1090#1077#1083#1100' '#1095#1077#1088#1074#1077#1081
-  ClientHeight = 278
-  ClientWidth = 632
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
   Font.Color = clWindowText
@@ -2131,25 +2129,28 @@ object MainForm: TMainForm
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
   Menu = mmuMenuBar
   OldCreateOrder = False
-  Position = poDesktopCenter
+  Position = poScreenCenter
+  ShowHint = True
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 19
   object gpbAntiRecycler: TGroupBox
-    Left = 328
-    Top = 8
-    Width = 297
-    Height = 193
+    Left = 296
+    Top = 32
+    Width = 281
+    Height = 201
     Caption = ' Anti Recycler '
     TabOrder = 1
     object lblAntiRecycler: TLabel
       Left = 8
       Top = 24
       Width = 262
-      Height = 76
+      Height = 95
       Caption = 
         #171'Anti-Recycler'#187' '#1087#1088#1077#1076#1085#1072#1079#1085#1072#1095#1077#1085' '#1076#1083#1103' '#1087#1088#1077#1076#1086#1090#1074#1088#1072#1097#1077#1085#1080#1103' '#1079#1072#1087#1080#1089#1080' '#1074#1088#1077#1076#1086#1085#1086#1089#1085 +
-        #1099#1093' '#1092#1072#1081#1083#1086#1074' '#1074' '#1090#1080#1087#1080#1095#1085#1091#1102' '#1076#1083#1103' '#1085#1080#1093' '#1087#1072#1087#1082#1091' '#171'RECYCLER'#187'.'
+        #1099#1093' '#1092#1072#1081#1083#1086#1074' '#1074' '#1090#1080#1087#1080#1095#1085#1091#1102' '#1076#1083#1103' '#1085#1080#1093' '#1087#1072#1087#1082#1091' '#171'RECYCLER'#187', '#1072' '#1090#1072#1082#1078#1077' '#1091#1076#1072#1083#1077#1085#1080#1103' ' +
+        #1074#1089#1077#1093' '#1103#1088#1083#1099#1082#1086#1074' '#1080#1079' '#1082#1086#1088#1085#1103' '#1092#1083#1077#1096#1082#1080'.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -16
@@ -2158,39 +2159,37 @@ object MainForm: TMainForm
       ParentFont = False
       WordWrap = True
     end
-    object btnARCreate: TButton
+    object spbARDCUp: TSpeedButton
       Left = 8
-      Top = 144
-      Width = 137
-      Height = 41
-      Cursor = crHandPoint
-      Caption = #1057#1086#1079#1076#1072#1090#1100
-      TabOrder = 0
-      OnClick = btnARCreateClick
+      Top = 168
+      Width = 129
+      Height = 22
+      Caption = 'DEFCON +1'
+      Flat = True
+      OnClick = spbARDCUpClick
     end
-    object btnARDelete: TButton
-      Left = 152
-      Top = 144
-      Width = 137
-      Height = 41
-      Cursor = crHandPoint
-      Caption = #1059#1076#1072#1083#1080#1090#1100
-      TabOrder = 1
-      OnClick = btnARDeleteClick
+    object spbARDCDown: TSpeedButton
+      Left = 144
+      Top = 168
+      Width = 129
+      Height = 22
+      Caption = 'DEFCON '#8211'1'
+      Flat = True
+      OnClick = spbARDCDownClick
     end
   end
   object gpbWormSlayer: TGroupBox
     Left = 8
-    Top = 8
-    Width = 313
-    Height = 193
+    Top = 32
+    Width = 281
+    Height = 201
     Caption = ' Worm Slayer '
     TabOrder = 0
     object lblWormSlayer: TLabel
       Left = 8
       Top = 24
-      Width = 293
-      Height = 114
+      Width = 253
+      Height = 133
       Caption = 
         #171'Worm Slayer'#187' ('#1048#1089#1090#1088#1077#1073#1080#1090#1077#1083#1100' '#1095#1077#1088#1074#1077#1081') '#1087#1088#1077#1076#1085#1072#1079#1085#1072#1095#1077#1085' '#1076#1083#1103' '#1091#1076#1072#1083#1077#1085#1080#1103' '#1089#1091#1097 +
         #1077#1089#1090#1074#1091#1102#1097#1077#1075#1086' '#1092#1072#1081#1083#1072' Autorun.inf '#1080' '#1089#1086#1079#1076#1072#1085#1080#1103' '#1086#1076#1085#1086#1080#1084#1105#1085#1085#1086#1081' '#1085#1077#1091#1076#1072#1083#1103#1077#1084#1086#1081' ' +
@@ -2204,72 +2203,59 @@ object MainForm: TMainForm
       ParentFont = False
       WordWrap = True
     end
-    object btnWSCreate: TButton
+    object spbWSDCUp: TSpeedButton
       Left = 8
-      Top = 144
-      Width = 145
-      Height = 41
-      Cursor = crHandPoint
-      Caption = #1057#1086#1079#1076#1072#1090#1100
-      TabOrder = 0
-      OnClick = btnWSCreateClick
+      Top = 168
+      Width = 129
+      Height = 22
+      Caption = 'DEFCON +1'
+      Flat = True
+      OnClick = spbWSDCUpClick
     end
-    object btnWSDelete: TButton
-      Left = 160
-      Top = 144
-      Width = 145
-      Height = 41
-      Cursor = crHandPoint
-      Caption = #1059#1076#1072#1083#1080#1090#1100
-      TabOrder = 1
-      OnClick = btnWSDeleteClick
+    object spbWSDCDown: TSpeedButton
+      Left = 144
+      Top = 168
+      Width = 129
+      Height = 22
+      Caption = 'DEFCON '#8211'1'
+      Flat = True
+      OnClick = spbWSDCDownClick
     end
   end
-  object StatusBar: TStatusBar
+  object stbStatusLine: TStatusBar
     Left = 0
-    Top = 258
-    Width = 632
+    Top = 288
+    Width = 584
     Height = 20
+    AutoHint = True
     Panels = <
       item
         Width = 50
       end>
     SimplePanel = True
-    SizeGrip = False
-  end
-  object btnRestore: TButton
-    Left = 200
-    Top = 208
-    Width = 137
-    Height = 41
-    Cursor = crHandPoint
-    Hint = #1042#1086#1089#1089#1090#1072#1085#1086#1074#1080#1090#1100' '#1089#1086#1089#1090#1086#1103#1085#1080#1077' '#1079#1072#1097#1080#1090#1099
-    Caption = '&'#1042#1086#1089#1089#1090#1072#1085#1086#1074#1080#1090#1100
-    TabOrder = 3
-    OnClick = MFileRestoreClick
   end
   object bbnAbout: TBitBtn
-    Left = 344
-    Top = 208
+    Left = 80
+    Top = 240
     Width = 137
     Height = 41
     Cursor = crHandPoint
     Hint = #1055#1086#1082#1072#1079#1072#1090#1100' '#1080#1085#1092#1086#1088#1084#1072#1094#1080#1102' '#1086#1073' '#1072#1074#1090#1086#1088#1077
     Caption = '&'#1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
-    TabOrder = 4
+    TabOrder = 3
     OnClick = MHelpAboutClick
     Kind = bkHelp
   end
   object bbnClose: TBitBtn
-    Left = 488
-    Top = 208
+    Left = 368
+    Top = 240
     Width = 137
     Height = 41
     Cursor = crHandPoint
     Hint = #1042#1099#1093#1086#1076' '#1080#1079' '#1087#1088#1086#1075#1088#1072#1084#1084#1099
     Cancel = True
     Caption = '&'#1042#1099#1093#1086#1076
-    TabOrder = 5
+    TabOrder = 4
     OnClick = MFileExitClick
     Glyph.Data = {
       DE010000424DDE01000000000000760000002800000024000000120000000100
@@ -2290,20 +2276,49 @@ object MainForm: TMainForm
       0000}
     NumGlyphs = 2
   end
+  object tlbRemovableDisks: TToolBar
+    Left = 0
+    Top = 0
+    Width = 584
+    Height = 27
+    AutoSize = True
+    ButtonHeight = 23
+    Caption = #1042#1099#1073#1086#1088' '#1089#1098#1105#1084#1085#1086#1075#1086' '#1076#1080#1089#1082#1072
+    EdgeBorders = [ebBottom]
+    ShowCaptions = True
+    TabOrder = 5
+    object sttChooseDisk: TStaticText
+      Left = 0
+      Top = 2
+      Width = 265
+      Height = 23
+      Alignment = taRightJustify
+      Caption = #1042#1099#1073#1077#1088#1080#1090#1077' '#1089#1098#1105#1084#1085#1099#1081' '#1076#1080#1089#1082' ('#1092#1083#1077#1096#1082#1091'): '
+      FocusControl = cbbRemovableDisks
+      TabOrder = 0
+    end
+    object cbbRemovableDisks: TComboBox
+      Left = 265
+      Top = 2
+      Width = 145
+      Height = 23
+      Style = csDropDownList
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      ItemHeight = 15
+      ParentFont = False
+      TabOrder = 1
+      OnSelect = cbbRemovableDisksSelect
+    end
+  end
   object mmuMenuBar: TMainMenu
-    Left = 24
-    Top = 208
+    Left = 240
+    Top = 240
     object MenuFile: TMenuItem
       Caption = '&'#1060#1072#1081#1083
-      Hint = #1054#1089#1085#1086#1074#1085#1086#1077' '#1084#1077#1085#1102' '#171#1060#1072#1081#1083#187
-      object MFileRestore: TMenuItem
-        Caption = #1042'&'#1086#1089#1089#1090#1072#1085#1086#1074#1080#1090#1100
-        Hint = #1042#1086#1089#1089#1090#1072#1085#1086#1074#1080#1090#1100' '#1089#1086#1089#1090#1086#1103#1085#1080#1077' '#1079#1072#1097#1080#1090#1099
-        OnClick = MFileRestoreClick
-      end
-      object MFileSeparator: TMenuItem
-        Caption = '-'
-      end
       object MFileExit: TMenuItem
         Caption = '&'#1042#1099#1093#1086#1076
         Hint = #1042#1099#1093#1086#1076' '#1080#1079' '#1087#1088#1086#1075#1088#1072#1084#1084#1099
@@ -2313,7 +2328,6 @@ object MainForm: TMainForm
     end
     object MenuHelp: TMenuItem
       Caption = '&'#1057#1087#1088#1072#1074#1082#1072
-      Hint = #1048#1085#1092#1086#1088#1084#1072#1094#1080#1086#1085#1085#1086#1077' '#1084#1077#1085#1102' '#171#1057#1087#1088#1072#1074#1082#1072#187
       object MHelpAbout: TMenuItem
         Caption = '&'#1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077'...'
         Hint = #1048#1085#1092#1086#1088#1084#1072#1094#1080#1103' '#1086#1073' '#1072#1074#1090#1086#1088#1077' '#1087#1088#1086#1075#1088#1072#1084#1084#1099
@@ -2321,5 +2335,11 @@ object MainForm: TMainForm
         OnClick = MHelpAboutClick
       end
     end
+  end
+  object tmrScanDrives: TTimer
+    Interval = 5000
+    OnTimer = tmrScanDrivesTimer
+    Left = 312
+    Top = 240
   end
 end

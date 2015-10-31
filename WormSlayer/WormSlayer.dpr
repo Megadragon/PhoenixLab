@@ -1,10 +1,15 @@
 program WormSlayer;
 
 uses
-	Forms, Windows, SysUtils,
-	uMain in 'uMain.pas' {MainForm},
-	uAbout in 'uAbout.pas' {AboutBox},
-	uSplash in 'uSplash.pas' {SplashScreen};
+	Forms,
+	Windows,
+	SysUtils,
+	uMain in 'src\uMain.pas' {frmMain},
+	uAbout in 'src\uAbout.pas' {AboutBox},
+	uSplash in 'src\uSplash.pas' {SplashScreen},
+	uDefenceUnit in 'src\uDefenceUnit.pas',
+	uWormSlayer in 'src\uWormSlayer.pas',
+	uAntiRecycler in 'src\uAntiRecycler.pas';
 
 {$R *.res}
 
@@ -12,20 +17,17 @@ begin
 	with TSplashScreen.Create(Application) do try
 		Show;
 		Update;
-		with pgbLoadStatus do
-			if GetDriveType(PChar(Copy(GetCurrentDir, 1, 3))) <> 2 then
-				MessageBox(0, '«апуск программы WormSlayer не на съЄмном носителе потенциально опасен!', 'WormSlayer', MB_ICONSTOP)
-			else begin
-				StepBy(Step);
-				Application.Title := 'WormSlayer Ц »стребитель червей';
-				StepBy(Step);
-				Application.CreateForm(TMainForm, MainForm);
-				StepBy(Step);
-				Application.CreateForm(TAboutBox, AboutBox);
-				StepBy(Step);
-			end;
+		with pgbLoadStatus do begin
+			Application.Title := 'WormSlayer Ч »стребитель червей';
+			StepBy(Step);
+			Application.CreateForm(TfrmMain, frmMain);
+			StepBy(Step);
+			Application.CreateForm(TAboutBox, AboutBox);
+			StepBy(Step);
+		end;
 	finally
 		Free;
 		Application.Run;
 	end;
 end.
+

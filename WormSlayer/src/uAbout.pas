@@ -46,7 +46,7 @@ end;
 
 procedure TAboutBox.EMailClick(Sender: TObject);
 begin
-	ShellExecute(Handle, 'open', 'mailto:Glossit@2upost.com?subject=WormSlayer v2.7.0.43', '', '', SW_SHOW);
+	ShellExecute(Handle, nil, 'mailto:Glossit@2upost.com?subject=WormSlayer v3.0.0.45', nil, nil, SW_SHOW);
 end;
 
 end.

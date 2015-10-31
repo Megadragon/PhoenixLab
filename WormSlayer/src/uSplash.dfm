@@ -1,11 +1,10 @@
-object AboutBox: TAboutBox
-  Left = 682
-  Top = 337
-  BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsDialog
-  Caption = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
-  ClientHeight = 241
-  ClientWidth = 409
+object SplashScreen: TSplashScreen
+  Left = 417
+  Top = 267
+  BorderStyle = bsNone
+  Caption = 'Splash Screen'
+  ClientHeight = 368
+  ClientWidth = 792
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -2128,24 +2127,23 @@ object AboutBox: TAboutBox
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-  OldCreateOrder = True
+  OldCreateOrder = False
   Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
   object Panel: TPanel
-    Left = 8
-    Top = 8
-    Width = 393
-    Height = 193
-    BevelInner = bvRaised
-    BevelOuter = bvLowered
-    ParentColor = True
+    Left = 0
+    Top = 0
+    Width = 792
+    Height = 368
+    Align = alClient
+    BevelInner = bvLowered
     TabOrder = 0
-    object ProgramIcon: TImage
+    object imgLogo: TImage
       Left = 8
       Top = 8
-      Width = 128
-      Height = 128
+      Width = 256
+      Height = 256
       Picture.Data = {
         07544269746D617036000100424D360001000000000036000000280000008000
         0000800000000100200000000000000001000000000000000000000000000000
@@ -4200,83 +4198,94 @@ object AboutBox: TAboutBox
         FF00}
       Stretch = True
       Transparent = True
-      IsControl = True
     end
-    object Comments: TLabel
-      Left = 8
-      Top = 144
-      Width = 377
-      Height = 39
-      Caption = 
-        #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1086#1090#1085#1086#1089#1080#1090#1089#1103' '#1082' '#1089#1074#1086#1073#1086#1076#1085#1086' '#1088#1072#1089#1087#1088#1086#1089#1090#1088#1072#1085#1103#1077#1084#1086#1084#1091' '#1055#1054', '#1086#1076#1085#1072#1082#1086' '#1080#1089#1087#1086 +
-        #1083#1100#1079#1086#1074#1072#1085#1080#1077' '#1087#1088#1086#1075#1088#1072#1084#1084#1099' '#1080'/'#1080#1083#1080' '#1077#1105' '#1095#1072#1089#1090#1077#1081' '#1074' '#1082#1086#1088#1099#1089#1090#1085#1099#1093' '#1094#1077#1083#1103#1093' '#1082#1072#1088#1072#1077#1090#1089#1103' '#1047 +
-        #1072#1082#1086#1085#1086#1084' '#1059#1082#1088#1072#1080#1085#1099' '#171#1054#1073' '#1072#1074#1090#1086#1088#1089#1082#1086#1084' '#1087#1088#1072#1074#1077' '#1080' '#1089#1084#1077#1078#1085#1099#1093' '#1087#1088#1072#1074#1072#1093#187'.'
-      WordWrap = True
-      IsControl = True
-    end
-    object Copyright: TLabel
-      Left = 144
-      Top = 84
-      Width = 176
-      Height = 13
-      Caption = 'Copyright '#169' Megadragon, 2011-2014'
-      IsControl = True
-    end
-    object Feedback: TLabel
-      Left = 144
-      Top = 104
-      Width = 229
-      Height = 26
-      Caption = #1044#1083#1103' '#1086#1073#1088#1072#1090#1085#1086#1081' '#1089#1074#1103#1079#1080' '#1089' '#1072#1074#1090#1086#1088#1086#1084' '#1080#1089#1087#1086#1083#1100#1079#1091#1081#1090#1077' E-Mail:'
-      WordWrap = True
-    end
-    object ProductName: TLabel
-      Left = 144
+    object lblProductName: TLabel
+      Left = 272
       Top = 8
-      Width = 237
-      Height = 52
-      Caption = 
-        'Wormslayer ('#1048#1089#1090#1088#1077#1073#1080#1090#1077#1083#1100' '#1095#1077#1088#1074#1077#1081') - '#1087#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1087#1088#1077#1076#1086#1090#1074#1088#1072#1097#1077#1085#1080#1103' '#1089 +
-        #1072#1084#1086#1087#1088#1086#1080#1079#1074#1086#1083#1100#1085#1086#1075#1086' '#1079#1072#1087#1091#1089#1082#1072' '#1074#1088#1077#1076#1086#1085#1086#1089#1085#1099#1093' '#1087#1088#1086#1075#1088#1072#1084#1084' '#1085#1072' '#1092#1083#1077#1096#1082#1077' '#1087#1086#1089#1088#1077#1076#1089#1090 +
-        #1074#1086#1084' '#1092#1072#1081#1083#1072' '#1072#1074#1090#1086#1079#1072#1087#1091#1089#1082#1072' (Autorun.inf).'
-      WordWrap = True
-      IsControl = True
-    end
-    object Version: TLabel
-      Left = 144
-      Top = 68
-      Width = 144
-      Height = 13
-      Caption = #1042#1077#1088#1089#1080#1103' '#1087#1088#1086#1075#1088#1072#1084#1084#1099': 2.7.0.43'
-      IsControl = True
-    end
-    object EMail: TLabel
-      Left = 179
-      Top = 117
-      Width = 97
-      Height = 13
-      Cursor = crHandPoint
-      Caption = 'Glossit@2upost.com'
+      Width = 406
+      Height = 140
+      Caption = 'WormSlayer'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlue
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsUnderline]
+      Font.Height = -120
+      Font.Name = 'Agency FB'
+      Font.Style = [fsBold]
       ParentFont = False
-      OnClick = EMailClick
-      OnMouseEnter = EMailMouseEnter
-      OnMouseLeave = EMailMouseLeave
+      Layout = tlCenter
     end
-  end
-  object OKButton: TButton
-    Left = 168
-    Top = 208
-    Width = 73
-    Height = 25
-    Cursor = crHandPoint
-    Caption = 'OK'
-    Default = True
-    ModalResult = 1
-    TabOrder = 1
+    object lblDescription: TLabel
+      Left = 272
+      Top = 160
+      Width = 491
+      Height = 62
+      Caption = 
+        #1059#1073#1077#1081' Autorun.inf! '#1059#1085#1080#1095#1090#1086#1078#1100' '#1074#1088#1077#1076#1086#1085#1086#1089#1085#1099#1077' '#1103#1088#1083#1099#1082#1080'! '#1057#1087#1072#1089#1080' '#1089#1074#1086#1102' '#1092#1083#1077#1096#1082#1091 +
+        ' '#1086#1090' '#1074#1080#1088#1091#1089#1086#1074'!'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -27
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsItalic]
+      ParentFont = False
+      WordWrap = True
+    end
+    object lblVersion: TLabel
+      Left = 8
+      Top = 272
+      Width = 236
+      Height = 24
+      Caption = #1042#1077#1088#1089#1080#1103': 3.0.0 ('#1089#1073#1086#1088#1082#1072' 45)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -21
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblCopyright: TLabel
+      Left = 272
+      Top = 272
+      Width = 383
+      Height = 21
+      Caption = #169' Megadragon, 2011-2015. '#1042#1089#1077' '#1087#1088#1072#1074#1072' '#1079#1072#1097#1080#1097#1077#1085#1099'.'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Times New Roman'
+      Font.Style = []
+      ParentFont = False
+    end
+    object lblWarning: TLabel
+      Left = 8
+      Top = 304
+      Width = 775
+      Height = 60
+      Caption = 
+        #1057' 16 '#1092#1077#1074#1088#1072#1083#1103' '#1087#1086' 29 '#1084#1072#1103' 2011 '#1075#1086#1076#1072' '#1088#1072#1079#1088#1072#1073#1072#1090#1099#1074#1072#1083#1072#1089#1100' '#1082#1086#1085#1089#1086#1083#1100#1085#1072#1103' '#1074#1077#1088#1089 +
+        #1080#1103' '#1087#1086#1076' '#1080#1084#1077#1085#1077#1084' USBBAT. '#1051#1077#1090#1086#1084' 2011 '#1075#1086#1076#1072' '#1072#1083#1075#1086#1088#1080#1090#1084#1099' USBBAT '#1073#1099#1083#1080' '#1085#1072#1087#1080 +
+        #1089#1072#1085#1099' '#1074' '#1089#1088#1077#1076#1077' Delphi 7. '#1057' '#1090#1077#1093' '#1087#1086#1088' '#1088#1072#1079#1088#1072#1073#1072#1090#1099#1074#1072#1077#1090#1089#1103' '#1080#1089#1082#1083#1102#1095#1080#1090#1077#1083#1100#1085#1086' W' +
+        'indows-'#1074#1077#1088#1089#1080#1103' '#1087#1088#1086#1075#1088#1072#1084#1084#1099' '#1087#1086#1076' '#1080#1084#1077#1085#1077#1084' WormSlayer. '#1040#1074#1090#1086#1088' '#1085#1077' '#1085#1077#1089#1105#1090' '#1086#1090 +
+        #1074#1077#1090#1089#1090#1074#1077#1085#1085#1086#1089#1090#1080' '#1079#1072' '#1085#1077#1087#1088#1072#1074#1080#1083#1100#1085#1086#1077' '#1080'/'#1080#1083#1080' '#1085#1077#1082#1086#1088#1088#1077#1082#1090#1085#1086#1077' '#1080#1089#1087#1086#1083#1100#1079#1086#1074#1072#1085#1080#1077' '#1087 +
+        #1088#1086#1075#1088#1072#1084#1084#1099'. '#1048#1089#1087#1086#1083#1100#1079#1086#1074#1072#1085#1080#1077' '#1087#1088#1086#1075#1088#1072#1084#1084#1099' '#1080'/'#1080#1083#1080' '#1077#1105' '#1095#1072#1089#1090#1077#1081' '#1074' '#1082#1086#1088#1099#1089#1090#1085#1099#1093' '#1080'/' +
+        #1080#1083#1080' '#1082#1086#1084#1084#1077#1088#1095#1077#1089#1082#1080#1093' '#1094#1077#1083#1103#1093' '#1074#1077#1076#1105#1090' '#1082' '#1072#1076#1084#1080#1085#1080#1089#1090#1088#1072#1090#1080#1074#1085#1086#1081' '#1080' '#1091#1075#1086#1083#1086#1074#1085#1086#1081' '#1086#1090#1074#1077 +
+        #1090#1089#1090#1074#1077#1085#1085#1086#1089#1090#1080' '#1074' '#1089#1086#1086#1090#1074#1077#1090#1089#1090#1074#1080#1080' '#1089' '#1047#1072#1082#1086#1085#1086#1084' '#1059#1082#1088#1072#1080#1085#1099' '#171#1054#1073' '#1072#1074#1090#1086#1088#1089#1082#1086#1084' '#1087#1088#1072#1074#1077 +
+        ' '#1080' '#1089#1084#1077#1078#1085#1099#1093' '#1087#1088#1072#1074#1072#1093#187'.'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Times New Roman'
+      Font.Style = []
+      ParentFont = False
+      WordWrap = True
+    end
+    object pgbLoadStatus: TProgressBar
+      Left = 272
+      Top = 224
+      Width = 513
+      Height = 41
+      Smooth = True
+      Step = 33
+      TabOrder = 0
+    end
   end
 end

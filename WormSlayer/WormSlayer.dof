@@ -17,15 +17,15 @@ M=0
 N=1
 O=1
 P=1
-Q=0
-R=0
+Q=1
+R=1
 S=0
-T=0
+T=1
 U=0
-V=1
+V=0
 W=0
 X=1
-Y=1
+Y=2
 Z=1
 ShowHints=1
 ShowWarnings=1
@@ -91,10 +91,10 @@ ImageBase=4194304
 ExeDescription=Программа не позволит червякам создать свой файл автозапуска на флешке, и, как следствие, запускаться автоматически
 [Directories]
 OutputDir=
-UnitOutputDir=
+UnitOutputDir=.\bin
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=
+SearchPath=.\src
 Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;IntrawebDB_50_70;Intraweb_50_70;Rave50CLX;Rave50VCL;dclOfficeXP;inetdb;CoolTrayIcon_D6plus;PNG_D7;PngComponentsD7
 Conditionals=
 DebugSourceDirs=
@@ -112,10 +112,10 @@ RootDir=
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=1
-MajorVer=2
-MinorVer=7
+MajorVer=3
+MinorVer=0
 Release=0
-Build=43
+Build=45
 Debug=0
 PreRelease=0
 Special=0
@@ -124,16 +124,22 @@ DLL=0
 Locale=1049
 CodePage=1251
 [Version Info Keys]
-CompanyName=
-FileDescription=Программа не позволит червякам создать свой файл автозапуска на флешке, и, как следствие, запускаться автоматически
-FileVersion=2.7.0.43
+CompanyName=Phoenix Lab
+FileDescription=The main executable for WormSlayer
+FileVersion=3.0.0.45
 InternalName=USBBAT
-LegalCopyright=Copyright © Megadragon, 2011-2014
+LegalCopyright=© Megadragon, 2011-2015
 LegalTrademarks=WormSlayer, USBBAT, Истребитель червей
 OriginalFilename=USBBAT.EXE
 ProductName=Истребитель червей
-ProductVersion=2.7
+ProductVersion=3.0
 Comments=Программа не позволит червякам создать свой файл автозапуска на флешке, и, как следствие, запускаться автоматически
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[HistoryLists\hlSearchPath]
+Count=1
+Item0=.\src
+[HistoryLists\hlUnitOutputDirectory]
+Count=1
+Item0=.\bin
