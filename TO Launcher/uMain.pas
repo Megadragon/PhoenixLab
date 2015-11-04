@@ -138,12 +138,14 @@ begin
 		0: Lang := 'ru';
 		1: Lang := 'en';
 		2: Lang := 'de';
+		3: Lang := 'pl';
 		else raise EListError.Create('Язык не выбран!');
 	end;
 	case cbbLocale.ItemIndex of
 		0: Locale := 'RU';
 		1: Locale := 'EN';
 		2: Locale := 'DE';
+		3: Locale := 'PL';
 		else raise EListError.Create('Локаль не выбрана!');
 	end;
 	Param := 'http://tankionline.com/battle-' + Lang + '.html#/server='
@@ -169,7 +171,7 @@ begin
 			case cbbLocale.ItemIndex of
 				0: for I := 1 to 24 do Add('Сервер №' + IntToStr(I));
 				1: for I := 1 to 9 do Add('Сервер №' + IntToStr(I));
-				2: for I := 1 to 1 do Add('Сервер №' + IntToStr(I));
+				2, 3: for I := 1 to 1 do Add('Сервер №' + IntToStr(I));
 			end;
 		finally
 			EndUpdate;
