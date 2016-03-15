@@ -115,7 +115,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=1
+Build=2
 Debug=0
 PreRelease=0
 Special=0
@@ -126,9 +126,9 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=PhoenixLab
 FileDescription=Main executable for 2048
-FileVersion=1.0.0.1
+FileVersion=1.0.0.2
 InternalName=Game2048
-LegalCopyright=© Megadragon, 2014-2015
+LegalCopyright=© Megadragon, 2014-2016
 LegalTrademarks=
 OriginalFilename=Game2048.exe
 ProductName=2048 äëÿ Windows
@@ -137,13 +137,3 @@ Comments=
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
-[HistoryLists\hlSearchPath]
-Count=1
-Item0=.\src
-[HistoryLists\hlUnitOutputDirectory]
-Count=2
-Item0=.\bin
-Item1=.\units
-[HistoryLists\hlOutputDirectorry]
-Count=1
-Item0=.\bin

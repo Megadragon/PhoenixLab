@@ -1,18 +1,20 @@
 [Closed Files]
-File_0=SourceModule,'D:\GitHub\PhoenixLab\2048\src\uAbout.pas',0,1,1,1,1,1,0
-File_1=SourceModule,'D:\GitHub\PhoenixLab\2048\uAbout.pas',0,1,1,1,1,1,0
-File_2=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uAbout.pas',0,1,1,1,1,1,0
-File_3=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uGame.pas',0,1,16,1,265,0,0
-File_4=SourceModule,'d:\program files\borland\delphi7\source\rtl\Sys\sysutils.pas',0,1,4924,1,4937,0,0
-File_5=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uSkins.pas',0,1,1,1,1,1,0
-File_6=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uParams.pas',0,1,1,1,1,1,0
-File_7=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uStats.pas',0,1,1,1,1,1,0
-File_8=SourceModule,'d:\program files\borland\delphi7\source\vcl\CheckLst.pas',0,1,447,1,449,0,0
-File_9=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uGameMgr.pas',0,1,1,1,1,0,0
+File_0=SourceModule,'D:\GitHub\PhoenixLab\2048\src\uParams.pas',0,1,1,1,1,1,0
+File_1=SourceModule,'D:\GitHub\PhoenixLab\2048\src\uAbout.pas',0,1,1,1,1,1,0
+File_2=SourceModule,'d:\program files\borland\delphi7\source\vcl\Graphics.pas',0,1,144,1,160,0,0
+File_3=SourceModule,'D:\GitHub\PhoenixLab\2048\src\uStats.pas',0,1,1,1,1,1,0
+File_4=SourceModule,'D:\GitHub\PhoenixLab\2048\uAbout.pas',0,1,1,1,1,1,0
+File_5=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uAbout.pas',0,1,1,1,1,1,0
+File_6=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uGame.pas',0,1,16,1,265,0,0
+File_7=SourceModule,'d:\program files\borland\delphi7\source\rtl\Sys\sysutils.pas',0,1,4924,1,4937,0,0
+File_8=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uSkins.pas',0,1,1,1,1,1,0
+File_9=SourceModule,'D:\Program Files\Borland\Delphi7\Projects\2048\uParams.pas',0,1,1,1,1,1,0
 
 [Modules]
 Module0=D:\GitHub\PhoenixLab\2048\src\uMain.pas
-Count=1
+Module1=D:\GitHub\PhoenixLab\2048\src\uSkins.pas
+Module2=D:\GitHub\PhoenixLab\2048\src\uGame.pas
+Count=3
 EditWindowCount=1
 
 [D:\GitHub\PhoenixLab\2048\src\uMain.pas]
@@ -20,7 +22,17 @@ ModuleType=SourceModule
 FormState=1
 FormOnTop=0
 
-[D:\Program Files\Borland\Delphi7\Bin\ProjectGroup1.bpg]
+[D:\GitHub\PhoenixLab\2048\src\uSkins.pas]
+ModuleType=SourceModule
+FormState=1
+FormOnTop=0
+
+[D:\GitHub\PhoenixLab\2048\src\uGame.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[D:\Program Files\Borland\Delphi7\Projects\ProjectGroup1.bpg]
 FormState=0
 FormOnTop=0
 
@@ -29,16 +41,18 @@ FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=1
+ViewCount=3
 CurrentView=0
 View0=0
+View1=1
+View2=2
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
 State=0
-Left=200
-Top=138
+Left=247
+Top=145
 Width=1302
 Height=682
 MaxLeft=-1
@@ -51,13 +65,27 @@ LeftPanelData=000004000000000000000000000000000000000000000000000100000000000000
 RightPanelSize=0
 BottomPanelSize=0
 BottomPanelClients=MessageView@EditWindow0
-BottomPanelData=00000400010000000B0000004D65737361676556696577060500000000000002550000000000000001000000000000000000000000010000000006050000000000000100000000060500000000000001000000000605000000000000FFFFFFFF
+BottomPanelData=00000400010000000B0000004D6573736167655669657706050000000000000255000000000000000100000000000000000000000001000000000605000000000000010000000006050000000000000100000000060500000000000001000000000605000000000000FFFFFFFF
 
 [View0]
 Module=D:\GitHub\PhoenixLab\2048\src\uMain.pas
+CursorX=28
+CursorY=261
+TopLine=242
+LeftCol=1
+
+[View1]
+Module=D:\GitHub\PhoenixLab\2048\src\uGame.pas
+CursorX=20
+CursorY=54
+TopLine=43
+LeftCol=1
+
+[View2]
+Module=D:\GitHub\PhoenixLab\2048\src\uSkins.pas
 CursorX=1
 CursorY=1
-TopLine=1
+TopLine=10
 LeftCol=1
 
 [Watches]
@@ -79,9 +107,9 @@ Width=1920
 Height=122
 MaxLeft=-1
 MaxTop=-1
-MaxWidth=1936
+MaxWidth=1932
 MaxHeight=122
-ClientWidth=1920
+ClientWidth=1916
 ClientHeight=84
 
 [ProjectManager]
@@ -130,7 +158,7 @@ LRDockWidth=190
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
+SelectedItem=Name
 ExpandedItems=
 HiddenCategories=
 

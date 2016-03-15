@@ -1210,7 +1210,7 @@ object AboutBox: TAboutBox
       Top = 64
       Width = 129
       Height = 13
-      Caption = #169' Megadragon, 2014-2015'
+      Caption = #169' Megadragon, 2014-2016'
       IsControl = True
     end
     object Comments: TLabel

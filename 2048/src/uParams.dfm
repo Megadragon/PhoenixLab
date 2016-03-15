@@ -19,7 +19,7 @@ object dlgParams: TdlgParams
     Top = 20
     Width = 98
     Height = 13
-    Caption = '&'#1056#1072#1079#1084#1077#1088' '#1089#1077#1090#1082#1080' (4-9):'
+    Caption = '&'#1056#1072#1079#1084#1077#1088' '#1089#1077#1090#1082#1080' (3-9):'
     FocusControl = speSize
   end
   object lblTarget: TLabel
@@ -63,7 +63,7 @@ object dlgParams: TdlgParams
     Width = 41
     Height = 22
     MaxValue = 9
-    MinValue = 4
+    MinValue = 3
     TabOrder = 1
     Value = 4
   end

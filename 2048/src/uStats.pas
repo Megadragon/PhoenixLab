@@ -33,7 +33,7 @@ var
 
 implementation
 
-uses IniFiles;
+uses IniFiles, uMain;
 
 const
 	sPlayersFileName = 'Players.dat';
@@ -42,12 +42,12 @@ const
 
 procedure TfrmStats.FormCreate(Sender: TObject);
 begin
-	LoadUsers(GetCurrentDir + '\' + sPlayersFileName);
+	LoadUsers(frmMain.GetApplicationPath + sPlayersFileName);
 end;
 
 procedure TfrmStats.FormDestroy(Sender: TObject);
 begin
-	SaveUsers(GetCurrentDir + '\' + sPlayersFileName);
+	SaveUsers(frmMain.GetApplicationPath + sPlayersFileName);
 end;
 
 procedure TfrmStats.FormShow(Sender: TObject);
@@ -108,3 +108,4 @@ begin
 end;
 
 end.
+

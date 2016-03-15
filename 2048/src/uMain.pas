@@ -57,6 +57,7 @@ type
 	public
 		IsContinue: Boolean;
 		function GetApplicationPath: string;
+		function QuestionBox(AText: string): Boolean;
 		procedure RefreshStatus;
 		procedure ResizeGameField(const NewSize: Byte);
 		procedure SaveAndFree;
@@ -85,10 +86,15 @@ begin
 	Result := ExtractFilePath(Application.ExeName);
 end;
 
+function TfrmMain.QuestionBox(AText: string): Boolean;
+begin
+	Result := MessageBox(Handle, PChar(AText), PChar(Application.Title), MB_YESNO or MB_ICONQUESTION) = ID_YES;
+end;
+
 procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 	if (Game <> nil) and (IsSaveOnExit or
-		(MessageBox(Handle, 'Игра не завершена. Сохранить её?', '2048', MB_YESNO or MB_ICONQUESTION) = ID_YES))
+		QuestionBox('Игра не завершена. Сохранить её?'))
 	then Game.SaveToFile(GetApplicationPath + sSaveFileName);
 	with TIniFile.Create(GetApplicationPath + sIniFileName) do try
 		WriteInteger('Settings', 'ModeIndex', idxMode);
@@ -126,7 +132,7 @@ begin
 		Free;
 	end;
 	if FileExists(GetApplicationPath + sSaveFileName) and (IsLoadOnStart or
-		(MessageBox(Handle, 'Найдено сохранение старой игры. Загрузить его?', '2048', MB_YESNO or MB_ICONQUESTION) = ID_YES))
+		QuestionBox('Найдено сохранение старой игры. Загрузить его?'))
 	then begin
 		Game := TGame.Create(GetApplicationPath + sSaveFileName);
 		RefreshStatus;
@@ -136,7 +142,7 @@ end;
 procedure TfrmMain.acnNewExecute(Sender: TObject);
 begin
 	if Game <> nil then
-		if MessageBox(Handle, 'Предыдущая игра не окончена. Продолжить её?', '2048', MB_YESNO or MB_ICONQUESTION) = ID_YES
+		if QuestionBox('Предыдущая игра не окончена. Продолжить её?')
 		then Exit else GameOver;
 	case idxMode of
 		{ TODO 2 -oMegadragon : Релизовать классический режим }
@@ -162,8 +168,7 @@ begin
 		Target := StrToInt(cbbTarget.Text);
 		IsLoadOnStart := ckbLoadOnStart.Checked;
 		IsSaveOnExit := ckbSaveOnExit.Checked;
-		if (idxMode <> rdgMode.ItemIndex)
-			and (MessageBox(Handle, 'Игра будет закончена. Продолжить?', '2048', MB_YESNO or MB_ICONQUESTION) = ID_YES)
+		if (idxMode <> rdgMode.ItemIndex) and QuestionBox('Игра будет закончена. Продолжить?')
 		then begin
 			GameOver;
 			idxMode := rdgMode.ItemIndex;
@@ -212,24 +217,52 @@ procedure TfrmMain.dwgFieldDrawCell(Sender: TObject; ACol, ARow: Integer;
 	Rect: TRect; State: TGridDrawState);
 var
 	bmpCurrImage: TBitmap;
-	sCurrFilename: string;
+	sFilename: string;
+	Value: Cardinal;
 begin
 	if Game = nil then inherited else begin
-		sCurrFilename := GetApplicationPath + CurrentSkin + '\' + IntToStr(Game.GetCell(ARow, ACol)) + '.bmp';
-		if FileExists(sCurrFilename) then begin
+		Value := Game.GetCell(ARow, ACol);
+		sFilename := GetApplicationPath + CurrentSkin + '\' + IntToStr(Value) + '.bmp';
+		if FileExists(sFilename) then begin
 			bmpCurrImage := TBitmap.Create;
 			try
-				bmpCurrImage.LoadFromFile(sCurrFilename);
+				bmpCurrImage.LoadFromFile(sFilename);
 				dwgField.Canvas.Draw(Rect.Left, Rect.Top, bmpCurrImage);
 			finally
 				bmpCurrImage.Free;
 			end;
 		end else with dwgField.Canvas do begin
-			sCurrFilename := IntToStr(Game.GetCell(ARow, ACol));
-			Font.Size := 48;
+			case Value of
+				0: Brush.Color := $B4C1CD;
+				2: Brush.Color := $DAE4EE;
+				4: Brush.Color := $C8E0ED;
+				8: Brush.Color := $79B1F2;
+				16: Brush.Color := $6395F5;
+				32: Brush.Color := $5F7CF6;
+				64: Brush.Color := $3B5EF6;
+				128: Brush.Color := $72CFED;
+				256: Brush.Color := $61CCED;
+				512: Brush.Color := $50C8ED;
+				1024: Brush.Color := $3FC5ED;
+				2048: Brush.Color := $2EC2ED;
+				else Brush.Color := $323A3C;
+			end;
+			FillRect(Rect);
+			if Value = 0 then Exit;
+			Font.Name := 'Arial';
+			case Value of
+				0..64: Font.Size := 55;
+				128..512: Font.Size := 45;
+				1024..2048: Font.Size := 35;
+				4096..8192: Font.Size := 30;
+				16384..65536: Font.Size := 25;
+				131072..524288: Font.Size := 20;
+			else Font.Size := 15;
+			end;
 			Font.Style := [fsBold];
-			TextOut(Rect.Left + (Rect.Right - Rect.Left - TextWidth(sCurrFilename)) div 2,
-				Rect.Top + (Rect.Bottom - Rect.Top - TextHeight(sCurrFilename)) div 2, sCurrFilename);
+			if Value < 8 then Font.Color := $656E77 else Font.Color := $F2F6F9;
+			TextOut((Rect.Left + Rect.Right - TextWidth(IntToStr(Value))) div 2,
+				(Rect.Top + Rect.Bottom - TextHeight(IntToStr(Value))) div 2, IntToStr(Value));
 		end;
 	end;
 end;
@@ -237,7 +270,7 @@ end;
 procedure TfrmMain.CheckEndOfGame;
 begin
 	if not IsContinue and Game.IsWin then begin
-		IsContinue := MessageBox(Handle, 'Вы выиграли! Хотите ли Вы продолжить игру?', '2048', MB_YESNO or MB_ICONQUESTION) = ID_YES;
+		IsContinue := QuestionBox('Вы выиграли! Хотите ли Вы продолжить игру?');
 		if not IsContinue then GameOver;
 	end else if Game.IsLose then GameOver;
 end;
@@ -295,3 +328,4 @@ begin
 end;
 
 end.
+
