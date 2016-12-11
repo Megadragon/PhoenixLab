@@ -38,7 +38,7 @@ var
 
 implementation
 
-uses Windows, SysUtils, Menus;
+uses Windows, SysUtils, Classes, Menus;
 
 const sHotKeyPrefix = 'Multiclip_Chat_';
 
@@ -71,47 +71,40 @@ begin
 end;
 
 procedure TCommandList.LoadFromFile(const AFilename: string);
-const // import from Classes.pas
-	scShift = $2000;
-	scCtrl = $4000;
-	scAlt = $8000;
-	scNone = 0;
 var
-	CmdList: TextFile;
+	CmdList: TStringList;
 	Buffer: string;
-	TabPos: Byte;
+	I, TabPos: Byte;
 	Shortcut: Word;
 begin
-	AssignFile(CmdList, AFilename);
-	Reset(CmdList);
-	while not Eof(CmdList) do begin
-		ReadLn(CmdList, Buffer);
-		SetLength(FList, Count + 1);
-		if Buffer > '' then with FList[Count - 1] do begin
-			IsDelay := Buffer[1] = '%';
-			if IsDelay then Delete(Buffer, 1, 1);
-			TabPos := Pos(#9, Buffer);
-			if TabPos = 0 then Text := Buffer else begin
-				Text := Copy(Buffer, 1, TabPos - 1);
-				Delete(Buffer, 1, TabPos);
-				with HotKey do begin
-					AsString := Buffer;
-					Shortcut := TextToShortCut(AsString);
-					if Shortcut > 0 then begin
-						Atom := GlobalAddAtom(PChar(sHotKeyPrefix + IntToStr(Count - 1)));
-						if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
-						if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
-						if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
-						VirtualCode := Byte(Shortcut);
-					end else begin
-						Atom := 0;
-						IsRegister := False;
-					end;
+	CmdList := TStringList.Create;
+	CmdList.LoadFromFile(AFilename);
+	SetLength(FList, CmdList.Count);
+	for I := 0 to CmdList.Count - 1 do if CmdList[I] > EmptyStr then with FList[I] do begin
+		Buffer := CmdList[I];
+		IsDelay := Buffer[1] = '%';
+		if IsDelay then Delete(Buffer, 1, 1);
+		TabPos := Pos(#9, Buffer);
+		if TabPos = 0 then Text := Buffer else begin
+			Text := Copy(Buffer, 1, TabPos - 1);
+			Delete(Buffer, 1, TabPos);
+			with HotKey do begin
+				AsString := Buffer;
+				Shortcut := TextToShortCut(AsString);
+				if Shortcut > 0 then begin
+					Atom := GlobalAddAtom(PChar(sHotKeyPrefix + IntToStr(I)));
+					if Shortcut and scShift > 0 then Modifiers := Modifiers or MOD_SHIFT;
+					if Shortcut and scCtrl > 0 then Modifiers := Modifiers or MOD_CONTROL;
+					if Shortcut and scAlt > 0 then Modifiers := Modifiers or MOD_ALT;
+					VirtualCode := Byte(Shortcut);
+				end else begin
+					Atom := 0;
+					IsRegister := False;
 				end;
 			end;
 		end;
 	end;
-	CloseFile(CmdList);
+	CmdList.Free;
 end;
 
 procedure TCommandList.RegHK;

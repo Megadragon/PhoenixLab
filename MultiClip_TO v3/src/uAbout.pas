@@ -31,7 +31,7 @@ uses ShellAPI;
 
 procedure TAboutBox.RemarksClick(Sender: TObject);
 begin
-	ShellExecute(Handle, nil, 'mailto:ssglobov@gmail.com&subject=Multiclip%20v3.2.0.56', nil, nil, SW_SHOWNORMAL);
+	ShellExecute(Handle, nil, 'mailto:ssglobov@gmail.com&subject=Multiclip%20v3.2.2.58', nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TAboutBox.RemarksMouseEnter(Sender: TObject);
