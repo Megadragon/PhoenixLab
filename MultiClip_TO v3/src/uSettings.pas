@@ -18,8 +18,6 @@ type
 		speAlpha: TSpinEdit;
 		speDelay: TSpinEdit;
 		cbbWndPos: TComboBox;
-		lblTargetWnd: TLabel;
-		cbbTargetWnd: TComboBox;
 		tbsList: TTabSheet;
 		lblFontSz: TLabel;
 		lblHKFontSz: TLabel;
@@ -41,9 +39,6 @@ type
 		procedure FormCreate(Sender: TObject);
 		procedure ColorBoxSelect(Sender: TObject);
 		procedure bbnOKClick(Sender: TObject);
-		procedure bbnCancelClick(Sender: TObject);
-	private
-		function GetApplicationPath: string;
 	end;
 
 var
@@ -51,19 +46,15 @@ var
 
 implementation
 
-const
-	sSettingsFileName = 'Multiclip.ini';
-
 {$R *.dfm}
 
 procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
-	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
+	with TIniFile.Create(ChangeFileExt(Application.ExeName, '.ini')) do try
 		speWidthMin.Value := ReadInteger('Settings', 'WidthMin', speWidthMin.Value);
 		speAlpha.Value := ReadInteger('Settings', 'AlphaBlendValue', speAlpha.Value);
 		speDelay.Value := ReadInteger('Settings', 'DelayBeforeMinimize', speDelay.Value);
 		cbbWndPos.Text := ReadString('Settings', 'WindowPosition', cbbWndPos.Text);
-		cbbTargetWnd.Text := ReadString('Settings', 'TargetWindowName', cbbTargetWnd.Text);
 		speFontSz.Value := ReadInteger('Settings', 'FontSize', speFontSz.Value);
 		speHKFontSz.Value := ReadInteger('Settings', 'HKFontSize', speHKFontSz.Value);
 		crbList.Selected := StringToColor(ReadString('Colors', 'List', ColorToString(crbList.Selected)));
@@ -82,19 +73,13 @@ begin
 		if Selected = clRed then Selected := DefaultColorColor;
 end;
 
-procedure TfrmSettings.bbnCancelClick(Sender: TObject);
-begin
-	Close;
-end;
-
 procedure TfrmSettings.bbnOKClick(Sender: TObject);
 begin
-	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
+	with TIniFile.Create(ChangeFileExt(Application.ExeName, '.ini')) do try
 		WriteInteger('Settings', 'WidthMin', speWidthMin.Value);
 		WriteInteger('Settings', 'AlphaBlendValue', speAlpha.Value);
 		WriteInteger('Settings', 'DelayBeforeMinimize', speDelay.Value);
 		WriteString('Settings', 'WindowPosition', cbbWndPos.Text);
-		WriteString('Settings', 'TargetWindowName', cbbTargetWnd.Text);
 		WriteInteger('Settings', 'FontSize', speFontSz.Value);
 		WriteInteger('Settings', 'HKFontSize', speHKFontSz.Value);
 		WriteString('Colors', 'List', ColorToString(crbList.Selected));
@@ -105,12 +90,6 @@ begin
 	finally
 		Free;
 	end;
-	Close;
-end;
-
-function TfrmSettings.GetApplicationPath: string;
-begin
-	Result := ExtractFilePath(Application.ExeName);
 end;
 
 end.

@@ -1,11 +1,10 @@
 object AboutBox: TAboutBox
   Left = 742
   Top = 410
-  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsDialog
   Caption = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
   ClientHeight = 193
-  ClientWidth = 313
+  ClientWidth = 297
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,23 +12,16 @@ object AboutBox: TAboutBox
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   FormStyle = fsStayOnTop
-  OldCreateOrder = True
+  OldCreateOrder = False
   Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
   object Panel: TPanel
     Left = 8
     Top = 8
-    Width = 297
+    Width = 281
     Height = 145
     BevelOuter = bvLowered
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -16
-    Font.Name = 'Times New Roman'
-    Font.Style = []
-    ParentColor = True
-    ParentFont = False
     TabOrder = 0
     object ProgramIcon: TImage
       Left = 8
@@ -2158,13 +2150,13 @@ object AboutBox: TAboutBox
     object ProductName: TLabel
       Left = 144
       Top = 8
-      Width = 143
-      Height = 24
-      Caption = 'Multiclip for TO'
+      Width = 66
+      Height = 20
+      Caption = 'Multiclip'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -21
-      Font.Name = 'Times New Roman'
+      Font.Height = -16
+      Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
       IsControl = True
@@ -2172,55 +2164,47 @@ object AboutBox: TAboutBox
     object Version: TLabel
       Left = 144
       Top = 32
-      Width = 104
-      Height = 19
-      Caption = #1042#1077#1088#1089#1080#1103' 3.2.2.58'
+      Width = 79
+      Height = 13
+      Caption = #1042#1077#1088#1089#1080#1103' 4.0.0.59'
       IsControl = True
     end
     object Copyright: TLabel
       Left = 144
       Top = 64
-      Width = 134
-      Height = 19
-      Caption = 'Copyright '#169' 2009-16'
+      Width = 100
+      Height = 13
+      Caption = 'Copyright '#169' 2009'#8211'17'
       IsControl = True
     end
     object Comments: TLabel
       Left = 144
       Top = 96
-      Width = 132
-      Height = 15
+      Width = 119
+      Height = 13
       Caption = #1040#1074#1090#1086#1088': '#1040#1085#1090#1086#1085' '#1053#1080#1082#1086#1083#1072#1077#1074
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -13
-      Font.Name = 'Times New Roman'
-      Font.Style = []
-      ParentFont = False
-      WordWrap = True
       IsControl = True
     end
     object Remarks: TLabel
       Left = 144
       Top = 112
-      Width = 133
-      Height = 15
+      Width = 116
+      Height = 13
       Cursor = crHandPoint
       Caption = #1059#1083#1091#1095#1096#1077#1085#1086': Megadragon'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlue
-      Font.Height = -13
-      Font.Name = 'Times New Roman'
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
       Font.Style = [fsUnderline]
       ParentFont = False
-      WordWrap = True
       OnClick = RemarksClick
       OnMouseEnter = RemarksMouseEnter
       OnMouseLeave = RemarksMouseLeave
     end
   end
   object OKButton: TBitBtn
-    Left = 120
+    Left = 112
     Top = 160
     Width = 75
     Height = 25

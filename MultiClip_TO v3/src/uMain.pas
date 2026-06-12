@@ -4,42 +4,59 @@ interface
 
 uses
 	Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-	Dialogs, StdCtrls, ExtCtrls, ActnList, StdActns, AppEvnts;
+	Dialogs, StdCtrls, ExtCtrls, AppEvnts, Menus;
 
 type
 	TMainForm = class(TForm)
+		mmnMenuBar: TMainMenu;
+		mniFile: TMenuItem;
+		mniFileOpen: TMenuItem;
+		mniFileSaveAs: TMenuItem;
+		mniFileSeparator: TMenuItem;
+		mniFileExit: TMenuItem;
+		mniTools: TMenuItem;
+		mniToolsOnOff: TMenuItem;
+		mniToolsCommands: TMenuItem;
+		mniToolsSettings: TMenuItem;
+		mniHelp: TMenuItem;
+		mniHelpAbout: TMenuItem;
 		lsbCommands: TListBox;
-		acnActions: TActionList;
-		acnExit: TFileExit;
-		acnAbout: TAction;
 		apeEvents: TApplicationEvents;
 		tmrMouseLeave: TTimer;
 		tmrTargetWndActivate: TTimer;
+		ondCommandList: TOpenDialog;
+		svdCommandList: TSaveDialog;
 		procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer;
 			var Resize: Boolean);
 		procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 		procedure FormCreate(Sender: TObject);
-		procedure FormDestroy(Sender: TObject);
 		procedure FormResize(Sender: TObject);
 		procedure lsbCommandsClick(Sender: TObject);
+		procedure lsbCommandsContextPopup(Sender: TObject; MousePos: TPoint;
+			var Handled: Boolean);
 		procedure lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 			Rect: TRect; State: TOwnerDrawState);
 		procedure lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 			var Height: Integer);
 		procedure lsbCommandsMouseMove(Sender: TObject; Shift: TShiftState;
 			X, Y: Integer);
-		procedure acnAboutExecute(Sender: TObject);
 		procedure apeEventsMinimize(Sender: TObject);
 		procedure apeEventsRestore(Sender: TObject);
 		procedure tmrMouseLeaveTimer(Sender: TObject);
 		procedure tmrTargetWndActivateTimer(Sender: TObject);
+		procedure mniFileOpenClick(Sender: TObject);
+		procedure mniFileSaveAsClick(Sender: TObject);
+		procedure mniFileExitClick(Sender: TObject);
+		procedure mniToolsOnOffClick(Sender: TObject);
+		procedure mniToolsCommandsClick(Sender: TObject);
+		procedure mniToolsSettingsClick(Sender: TObject);
+		procedure mniHelpAboutClick(Sender: TObject);
 	public
-		function GetApplicationPath: string;
 		procedure LoadCommands;
 		procedure LoadFromIni;
 		procedure Restore;
 		procedure SaveToIni;
-		procedure SendCommand(const Index: Byte);
+		procedure SendCommand(const Index: Byte; const AMouseButton: TMouseButton);
 		procedure Shrink;
 		procedure WndProc(var Msg: TMessage); override;
 	end;
@@ -49,23 +66,20 @@ var
 
 implementation
 
-uses Clipbrd, IniFiles, uAbout, uCommandList;
+uses Clipbrd, IniFiles, uAbout, uCommandList, uCommands, uSettings;
 
 const
 	sCommandFileName = 'command.lst';
-	sSettingsFileName = 'Multiclip.ini';
 
 var
 	WidthMin, WidthMax: Word;
 	IsHidden, IsChangeForm: Boolean;
-	FontSz, HKFontSz: Byte;
+	CommandFontSize, HotKeyFontSize: Byte;
 
-	clList, clSelected: TColor;
-	clText, clSeparator: TColor;
-	clHotkey: TColor;
+	clList, clSelected, clText, clSeparator, clHotKey, clAltHotKey: TColor;
 
-	hActiveWnd: THandle;
-	TargetWndName, WndPos: string;
+	hActiveWindow: THandle;
+	CommandList, WindowPosition, HotKeyPosition: string;
 
 {$R *.dfm}
 
@@ -75,8 +89,8 @@ begin
 	if not IsChangeForm then begin
 		if IsHidden then NewWidth := Width else begin
 			WidthMax := NewWidth;
-			if WndPos = 'Left' then Left := 0 else
-				if WndPos = 'Right' then Left := Screen.WorkAreaWidth - WidthMax;
+			if WindowPosition = 'Left' then Left := 0 else
+				if WindowPosition = 'Right' then Left := Screen.WorkAreaWidth - WidthMax;
 		end;
 		NewHeight := Height;
 	end;
@@ -89,16 +103,11 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-	hOwner := Handle;
-	Commands := TCommandList.Create(GetApplicationPath + sCommandFileName);
+	ondCommandList.InitialDir := GetCurrentDir;
+	svdCommandList.InitialDir := GetCurrentDir;
 	LoadFromIni;
 	LoadCommands;
 	Restore;
-end;
-
-procedure TMainForm.FormDestroy(Sender: TObject);
-begin
-	Commands.Free;
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
@@ -108,39 +117,60 @@ end;
 
 procedure TMainForm.lsbCommandsClick(Sender: TObject);
 begin
-	with lsbCommands do if Items[ItemIndex] > '' then begin
-		SendCommand(ItemIndex);
+	with lsbCommands do if Items[ItemIndex] > EmptyStr then begin
+		SendCommand(ItemIndex, mbLeft);
 		if not IsHidden then Shrink;
+	end;
+end;
+
+procedure TMainForm.lsbCommandsContextPopup(Sender: TObject;
+	MousePos: TPoint; var Handled: Boolean);
+begin
+	with lsbCommands do if Items[ItemAtPos(MousePos, True)] > EmptyStr then begin
+		SendCommand(ItemAtPos(MousePos, True), mbRight);
+		Handled := True;
 	end;
 end;
 
 procedure TMainForm.lsbCommandsDrawItem(Control: TWinControl; Index: Integer;
 	Rect: TRect; State: TOwnerDrawState);
+const
+	Gap = 2;
 var
-	hkWidth: Integer;
+	HotKeyWidth: Integer;
 begin
-	with lsbCommands.Canvas do if lsbCommands.Items[Index] = '' then begin
+	with lsbCommands.Canvas do if lsbCommands.Items[Index] = EmptyStr then begin
+		State := [odDisabled];
 		Brush.Color := clSeparator;
 		FillRect(Rect);
 	end else begin
-		if Index = lsbCommands.ItemIndex then Brush.Color := clSelected else Brush.Color := clList;
+		if Index = lsbCommands.ItemIndex then begin
+			State := [odSelected];
+			Brush.Color := clSelected;
+		end else begin
+			State := [odDefault];
+			Brush.Color := clList;
+		end;
 		FillRect(Rect);
-		Font.Height := FontSz;
+		Font.Height := CommandFontSize;
 		Font.Color := clText;
-		TextOut(Rect.Left + 2, Rect.Top, Commands[Index].Text);
-		Font.Height := HKFontSz;
-		if Commands[Index].HotKey.IsRegister then Font.Color := clHotkey else Font.Color := clRed;
-		hkWidth := TextWidth(Commands[Index].HotKey.AsString);
-		TextOut(Rect.Right - hkWidth - 2, Rect.Top, Commands[Index].HotKey.AsString);
-		Brush.Color := clWhite;
-		Font.Color := clBlack;
+		TextOut(Rect.Left + Gap, Rect.Top, Commands[Index].Text);
+		Font.Height := HotKeyFontSize;
+		if Commands[Index].HotKey.IsRegister then Font.Color := clHotKey else Font.Color := clRed;
+		HotKeyWidth := TextWidth(Commands[Index].HotKey.AsString);
+		if HotKeyPosition = 'Down' then TextOut(Rect.Left + Gap, Rect.Bottom - Font.Height, Commands[Index].HotKey.AsString)
+		else TextOut(Rect.Right - HotKeyWidth - 2, Rect.Top, Commands[Index].HotKey.AsString);
+		if Commands[Index].AltHotKey.IsRegister then Font.Color := clAltHotKey else Font.Color := clRed;
+		HotKeyWidth := TextWidth(Commands[Index].AltHotKey.AsString);
+		TextOut(Rect.Right - HotKeyWidth - 2, Rect.Top, Commands[Index].AltHotKey.AsString);
 	end;
 end;
 
 procedure TMainForm.lsbCommandsMeasureItem(Control: TWinControl; Index: Integer;
 	var Height: Integer);
 begin
-	if lsbCommands.Items[Index] = '' then Height := 2 else Height := FontSz;
+	if lsbCommands.Items[Index] = EmptyStr then Height := 2 else
+		if HotkeyPosition = 'Down' then Height := CommandFontSize + HotKeyFontSize else Height := CommandFontSize;
 end;
 
 procedure TMainForm.lsbCommandsMouseMove(Sender: TObject; Shift: TShiftState;
@@ -157,20 +187,15 @@ begin
 	tmrMouseLeave.Enabled := True;
 end;
 
-procedure TMainForm.acnAboutExecute(Sender: TObject);
-begin
-	AboutBox.ShowModal;
-end;
-
 procedure TMainForm.apeEventsMinimize(Sender: TObject);
 begin
-	Commands.UnregHK;
+	Commands.UnregisterHotKeys;
 	ShowWindow(Application.Handle, SW_SHOW);
 end;
 
 procedure TMainForm.apeEventsRestore(Sender: TObject);
 begin
-	Commands.RegHK;
+	Commands.RegisterHotKeys;
 	ShowWindow(Application.Handle, SW_HIDE);
 end;
 
@@ -184,21 +209,16 @@ var
 	H: THandle;
 begin
 	H := GetForegroundWindow;
-	if H <> Handle then hActiveWnd := H;
+	if H <> Handle then hActiveWindow := H;
 	if (Tag >= 0) and (GetKeyState(VK_SHIFT) + GetKeyState(VK_CONTROL) + GetKeyState(VK_MENU) >= 0)
-	then SendCommand(Tag);
+	then SendCommand(Tag, mbMiddle);
 end;
 
 { Public procedures }
 
-function TMainForm.GetApplicationPath: string;
-begin
-	Result := ExtractFilePath(Application.ExeName);
-end;
-
 procedure TMainForm.LoadCommands;
 var
-	I: Byte;
+	I: Shortint;
 begin
 	lsbCommands.Items.BeginUpdate;
 	for I := 0 to Commands.Count - 1 do lsbCommands.Items.Add(Commands[I].Text);
@@ -209,24 +229,26 @@ end;
 
 procedure TMainForm.LoadFromIni;
 begin
-	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
+	with TIniFile.Create(ChangeFileExt(Application.ExeName, '.ini')) do try
 		Left := ReadInteger('Settings', 'Left', Left);
 		Top := ReadInteger('Settings', 'Top', Top);
 		WidthMin := ReadInteger('Settings', 'WidthMin', 132);
-		if WidthMin < 132 then WidthMin := 132;
 		WidthMax := ReadInteger('Settings', 'WidthMax', 300);
 		if WidthMax < WidthMin then WidthMax := WidthMin;
 		AlphaBlendValue := ReadInteger('Settings', 'AlphaBlendValue', 40);
 		tmrMouseLeave.Interval := ReadInteger('Settings', 'DelayBeforeMinimize', 300);
-		FontSz := ReadInteger('Settings', 'FontSize', 30);
-		HKFontSz := ReadInteger('Settings', 'HKFontSize', 15);
-		WndPos := ReadString('Settings', 'WindowPosition', 'Right');
-		if (WndPos <> 'Left') and (WndPos <> 'Right') and (WndPos <> 'Manual') then WndPos := 'Right';
-		TargetWndName := ReadString('Settings', 'TargetWindowName', '');
+		CommandFontSize := ReadInteger('Settings', 'FontSize', 30);
+		HotkeyFontSize := ReadInteger('Settings', 'HKFontSize', 15);
+		WindowPosition := ReadString('Settings', 'WindowPosition', 'Right');
+		if (WindowPosition <> 'Left') and (WindowPosition <> 'Right') and (WindowPosition <> 'Manual') then WindowPosition := 'Right';
+		HotkeyPosition := ReadString('Settings', 'HotkeyPosition', 'Down');
+		if (HotkeyPosition <> 'Down') and (HotkeyPosition <> 'Right') then HotkeyPosition := 'Right';
+		CommandList := ReadString('Settings', 'CommandList', EmptyStr);
 		clList := StringToColor(ReadString('Colors', 'List', 'clWhite'));
 		clSelected := StringToColor(ReadString('Colors', 'Selected', 'clLime'));
 		clText := StringToColor(ReadString('Colors', 'Text', 'clBlack'));
 		clHotkey := StringToColor(ReadString('Colors', 'Hotkey', 'clOlive'));
+		clAltHotkey := StringToColor(ReadString('Colors', 'AltHotkey', 'clGreen'));
 		clSeparator := StringToColor(ReadString('Colors', 'Separator', 'clBlack'));
 	finally
 		Free;
@@ -237,9 +259,9 @@ procedure TMainForm.Restore;
 begin
 	if IsHidden then begin
 		IsChangeForm := True;
-		if WndPos = 'Left' then Left := 0 else
-			if WndPos = 'Right' then Left := Screen.Width - WidthMax;
-		if WndPos <> 'Manual' then Width := WidthMax;
+		if WindowPosition <> 'Manual' then Width := WidthMax;
+		if WindowPosition = 'Left' then Left := 0 else
+			if WindowPosition = 'Right' then Left := Screen.Width - Width;
 		AlphaBlend := False;
 		IsChangeForm := False;
 	end;
@@ -249,20 +271,21 @@ end;
 
 procedure TMainForm.SaveToIni;
 begin
-	with TIniFile.Create(GetApplicationPath + sSettingsFileName) do try
+	with TIniFile.Create(ChangeFileExt(Application.ExeName, '.ini')) do try
 		WriteInteger('Settings', 'Left', Left);
 		WriteInteger('Settings', 'Top', Top);
 		WriteInteger('Settings', 'WidthMax', WidthMax);
-		WriteString('Settings', 'WindowPosition', WndPos);
+		WriteString('Settings', 'WindowPosition', WindowPosition);
+		WriteString('Settings', 'HotkeyPosition', HotkeyPosition);
 	finally
 		Free;
 	end;
 end;
 
-procedure TMainForm.SendCommand(const Index: Byte);
+procedure TMainForm.SendCommand(const Index: Byte; const AMouseButton: TMouseButton);
 var
 	IsWindowFound: Boolean;
-	CurrKbdLayout: HKL;
+	CurrentKeyboardLayout: HKL;
 
 	procedure ClickKey(Key: Word);
 	begin
@@ -271,12 +294,12 @@ var
 	end;
 
 begin
-	CurrKbdLayout := ActivateKeyboardLayout($0419, KLF_ACTIVATE);
+	CurrentKeyboardLayout := ActivateKeyboardLayout($0419, KLF_ACTIVATE);
 	Clipboard.AsText := Commands[Index].Text;
-	ActivateKeyboardLayout(CurrKbdLayout, KLF_ACTIVATE);
-	if TargetWndName = '' then IsWindowFound := hActiveWnd > 0
-	else IsWindowFound := hActiveWnd = FindWindow(nil, PChar(TargetWndName));
-	SetForegroundWindow(hActiveWnd);
+	ActivateKeyboardLayout(CurrentKeyboardLayout, KLF_ACTIVATE);
+	if Commands.Header[0] = EmptyStr then IsWindowFound := hActiveWindow > 0
+	else IsWindowFound := hActiveWindow = FindWindow(nil, PChar(Commands.Header[0]));
+	SetForegroundWindow(hActiveWindow);
 	if IsWindowFound then begin
 		ClickKey(VK_RETURN);
 		Sleep(100);
@@ -294,9 +317,9 @@ begin
 	tmrMouseLeave.Enabled := False;
 	if not IsHidden then begin
 		IsChangeForm := True;
-		if WndPos = 'Left' then Left := 0 else
-			if WndPos = 'Right' then Left := Screen.Width - WidthMin;
-		if WndPos <> 'Manual' then Width := WidthMin;
+		if WindowPosition <> 'Manual' then Width := WidthMin;
+		if WindowPosition = 'Left' then Left := 0 else
+			if WindowPosition = 'Right' then Left := Screen.Width - Width;
 		AlphaBlend := True;
 		IsHidden := True;
 		IsChangeForm := False;
@@ -305,7 +328,7 @@ end;
 
 procedure TMainForm.WndProc(var Msg: TMessage);
 var
-	I: Byte;
+	I: Shortint;
 begin
 	case Msg.Msg of
 		WM_ENTERSIZEMOVE: tmrMouseLeave.Enabled := False;
@@ -314,9 +337,9 @@ begin
 			if Msg.wParam = Commands[I].HotKey.Atom then Tag := I;
 		WM_MOVE: if not IsChangeForm then begin
 			IsChangeForm := True;
-			if Left = 0 then WndPos := 'Left' else
-				if Left + Width = Screen.WorkAreaWidth then WndPos := 'Right'
-				else WndPos := 'Manual';
+			if Left = 0 then WindowPosition := 'Left' else
+				if Left + Width = Screen.WorkAreaWidth then WindowPosition := 'Right'
+				else WindowPosition := 'Manual';
 			IsChangeForm := False;
 		end;
 		WM_MOVING: begin
@@ -331,6 +354,41 @@ begin
 		end;
 		else inherited;
 	end;
+end;
+
+procedure TMainForm.mniFileOpenClick(Sender: TObject);
+begin
+	if ondCommandList.Execute then LoadCommands;
+end;
+
+procedure TMainForm.mniFileSaveAsClick(Sender: TObject);
+begin
+	if svdCommandList.Execute then ;
+end;
+
+procedure TMainForm.mniFileExitClick(Sender: TObject);
+begin
+	Close;
+end;
+
+procedure TMainForm.mniToolsOnOffClick(Sender: TObject);
+begin
+	with mniToolsOnOff do if Checked then Caption := 'Включить' else Caption := 'Выключить';
+end;
+
+procedure TMainForm.mniToolsCommandsClick(Sender: TObject);
+begin
+	frmCommands.ShowModal;
+end;
+
+procedure TMainForm.mniToolsSettingsClick(Sender: TObject);
+begin
+	frmSettings.ShowModal;
+end;
+
+procedure TMainForm.mniHelpAboutClick(Sender: TObject);
+begin
+	AboutBox.ShowModal;
 end;
 
 initialization

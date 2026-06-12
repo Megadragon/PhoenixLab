@@ -3,7 +3,7 @@ object frmSettings: TfrmSettings
   Top = 287
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = #1056#1077#1076#1072#1082#1090#1086#1088' '#1085#1072#1089#1090#1088#1086#1077#1082' Multiclip'
+  Caption = #1055#1072#1088#1072#1084#1077#1090#1088#1099
   ClientHeight = 273
   ClientWidth = 241
   Color = clBtnFace
@@ -2131,11 +2131,7 @@ object frmSettings: TfrmSettings
   OldCreateOrder = False
   Position = poScreenCenter
   ShowHint = True
-  Visible = True
   OnCreate = FormCreate
-  DesignSize = (
-    241
-    273)
   PixelsPerInch = 96
   TextHeight = 13
   object pgcTabs: TPageControl
@@ -2148,9 +2144,6 @@ object frmSettings: TfrmSettings
     TabOrder = 0
     object tbsForm: TTabSheet
       Caption = #1055#1072#1088#1072#1084#1077#1090#1088#1099' '#1086#1082#1085#1072
-      DesignSize = (
-        217
-        197)
       object lblWidthMin: TLabel
         Left = 8
         Top = 12
@@ -2178,13 +2171,6 @@ object frmSettings: TfrmSettings
         Width = 71
         Height = 13
         Caption = #1055#1086#1079#1080#1094#1080#1103' '#1086#1082#1085#1072
-      end
-      object lblTargetWnd: TLabel
-        Left = 8
-        Top = 152
-        Width = 131
-        Height = 13
-        Caption = #1047#1072#1075#1086#1083#1086#1074#1086#1082' '#1094#1077#1083#1077#1074#1086#1075#1086' '#1086#1082#1085#1072
       end
       object speWidthMin: TSpinEdit
         Left = 152
@@ -2231,23 +2217,6 @@ object frmSettings: TfrmSettings
         MinValue = 0
         TabOrder = 2
         Value = 160
-      end
-      object cbbTargetWnd: TComboBox
-        Left = 8
-        Top = 168
-        Width = 201
-        Height = 21
-        AutoDropDown = True
-        AutoCloseUp = True
-        Anchors = [akLeft, akTop, akRight]
-        ItemHeight = 13
-        TabOrder = 4
-        Items.Strings = (
-          'Tanki Online - Avant Browser'
-          'Tanki Online - Google Chrome'
-          'Tanki Online - Internet Explorer'
-          'Tanki Online - Mozilla Firefox'
-          'Tanki Online - Opera')
       end
     end
     object tbsList: TTabSheet
@@ -2398,7 +2367,6 @@ object frmSettings: TfrmSettings
     Top = 240
     Width = 75
     Height = 25
-    Anchors = [akLeft, akBottom]
     TabOrder = 1
     OnClick = bbnOKClick
     Kind = bkOK
@@ -2408,9 +2376,7 @@ object frmSettings: TfrmSettings
     Top = 240
     Width = 75
     Height = 25
-    Anchors = [akRight, akBottom]
     TabOrder = 2
-    OnClick = bbnCancelClick
     Kind = bkCancel
   end
 end

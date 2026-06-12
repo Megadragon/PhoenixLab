@@ -50,6 +50,7 @@ object MainForm: TMainForm
     088000880000000000FFF88000000000000000000000FC3F0000F81F0000F01F
     0000F11F0000F0070000F0070000F0070000F0070000F0070000F0070000F007
     0000F0070000F0070000F0070000F80F0000FC1F0000}
+  Menu = mmnMenuBar
   OldCreateOrder = False
   ScreenSnap = True
   SnapBuffer = 40
@@ -57,7 +58,6 @@ object MainForm: TMainForm
   OnCanResize = FormCanResize
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
@@ -66,7 +66,7 @@ object MainForm: TMainForm
     Left = 0
     Top = 0
     Width = 196
-    Height = 475
+    Height = 436
     Style = lbOwnerDrawVariable
     Align = alClient
     BorderStyle = bsNone
@@ -79,6 +79,7 @@ object MainForm: TMainForm
     ParentFont = False
     TabOrder = 0
     OnClick = lsbCommandsClick
+    OnContextPopup = lsbCommandsContextPopup
     OnDrawItem = lsbCommandsDrawItem
     OnMeasureItem = lsbCommandsMeasureItem
     OnMouseMove = lsbCommandsMouseMove
@@ -95,28 +96,73 @@ object MainForm: TMainForm
     Left = 48
     Top = 264
   end
-  object acnActions: TActionList
-    Left = 48
-    Top = 128
-    object acnExit: TFileExit
-      Category = 'File'
-      Caption = '&'#1042#1099#1093#1086#1076
-      Hint = #1042#1099#1093#1086#1076'|'#1042#1099#1081#1090#1080' '#1080#1079' '#1087#1088#1080#1083#1086#1078#1077#1085#1080#1103
-      ImageIndex = 43
-      ShortCut = 16465
-    end
-    object acnAbout: TAction
-      Category = 'Help'
-      Caption = '&'#1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
-      Hint = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077'|'#1055#1086#1082#1072#1079#1072#1090#1100' '#1080#1085#1092#1086#1088#1084#1072#1094#1080#1102' '#1086' '#1087#1088#1086#1075#1088#1072#1084#1084#1077' '#1080' '#1077#1105' '#1088#1072#1079#1088#1072#1073#1086#1090#1095#1080#1082#1072#1093
-      ShortCut = 57376
-      OnExecute = acnAboutExecute
-    end
-  end
   object apeEvents: TApplicationEvents
     OnMinimize = apeEventsMinimize
     OnRestore = apeEventsRestore
-    Left = 120
-    Top = 128
+    Left = 128
+    Top = 48
+  end
+  object mmnMenuBar: TMainMenu
+    Left = 48
+    Top = 48
+    object mniFile: TMenuItem
+      Caption = '&'#1060#1072#1081#1083
+      object mniFileOpen: TMenuItem
+        Caption = '&'#1054#1090#1082#1088#1099#1090#1100'...'
+        ShortCut = 16463
+        OnClick = mniFileOpenClick
+      end
+      object mniFileSaveAs: TMenuItem
+        Caption = '&'#1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1082#1072#1082'...'
+        ShortCut = 16467
+        OnClick = mniFileSaveAsClick
+      end
+      object mniFileSeparator: TMenuItem
+        Caption = '-'
+      end
+      object mniFileExit: TMenuItem
+        Caption = '&'#1042#1099#1093#1086#1076
+        ShortCut = 16465
+        OnClick = mniFileExitClick
+      end
+    end
+    object mniTools: TMenuItem
+      Caption = '&'#1048#1085#1089#1090#1088#1091#1084#1077#1085#1090#1099
+      object mniToolsOnOff: TMenuItem
+        AutoCheck = True
+        Caption = '&'#1042#1082#1083'. / '#1074#1099#1082#1083'.'
+        OnClick = mniToolsOnOffClick
+      end
+      object mniToolsCommands: TMenuItem
+        Caption = '&'#1055#1088#1072#1074#1080#1090#1100' '#1089#1087#1080#1089#1086#1082'...'
+        OnClick = mniToolsCommandsClick
+      end
+      object mniToolsSettings: TMenuItem
+        Caption = '&'#1053#1072#1089#1090#1088#1086#1081#1082#1080'...'
+        OnClick = mniToolsSettingsClick
+      end
+    end
+    object mniHelp: TMenuItem
+      Caption = '&'#1057#1087#1088#1072#1074#1082#1072
+      object mniHelpAbout: TMenuItem
+        Caption = '&'#1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077'...'
+        ShortCut = 112
+        OnClick = mniHelpAboutClick
+      end
+    end
+  end
+  object ondCommandList: TOpenDialog
+    DefaultExt = 'lst'
+    Filter = #1060#1072#1081#1083' '#1089#1087#1080#1089#1082#1072' '#1082#1086#1084#1072#1085#1076' (*.lst)|*.lst'
+    Title = #1047#1072#1075#1088#1091#1079#1080#1090#1100' '#1089#1087#1080#1089#1086#1082' '#1082#1086#1084#1072#1085#1076
+    Left = 48
+    Top = 120
+  end
+  object svdCommandList: TSaveDialog
+    DefaultExt = 'lst'
+    Filter = #1060#1072#1081#1083' '#1089#1087#1080#1089#1082#1072' '#1082#1086#1084#1072#1085#1076' (*.lst)|*.lst'
+    Title = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1089#1087#1080#1089#1086#1082' '#1082#1086#1084#1072#1085#1076
+    Left = 128
+    Top = 120
   end
 end

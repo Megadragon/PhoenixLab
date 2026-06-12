@@ -2,8 +2,9 @@ unit uAbout;
 
 interface
 
-uses Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
-	Buttons, ExtCtrls;
+uses
+	Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls, Buttons,
+	ExtCtrls;
 
 type
 	TAboutBox = class(TForm)
@@ -31,7 +32,7 @@ uses ShellAPI;
 
 procedure TAboutBox.RemarksClick(Sender: TObject);
 begin
-	ShellExecute(Handle, nil, 'mailto:ssglobov@gmail.com&subject=Multiclip%20v3.2.2.58', nil, nil, SW_SHOWNORMAL);
+	ShellExecute(Handle, nil, 'mailto:ssglobov@gmail.com&subject=Multiclip%20v4.0.0.59', nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TAboutBox.RemarksMouseEnter(Sender: TObject);
